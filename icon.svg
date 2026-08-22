@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#7A45A8"/><stop offset="1" stop-color="#5B2A86"/>
+  </linearGradient></defs>
+  <rect width="48" height="48" rx="10" fill="url(#g)"/>
+  <!-- A stack, not a dumbbell: the tracker already owns the dumbbell, and at
+       Home Screen size the two would read as the same app. Three heavy bars
+       say "a routine you assemble" and survive 16px, where anything finer
+       turns to mush. Purple is doing the real identifying work. -->
+  <rect x="10" y="12"   width="28" height="7" rx="3.5" fill="#fff"/>
+  <rect x="10" y="22.5" width="28" height="7" rx="3.5" fill="#fff" opacity=".72"/>
+  <rect x="10" y="33"   width="28" height="7" rx="3.5" fill="#fff"/>
+</svg>

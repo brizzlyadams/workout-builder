@@ -1,0 +1,1234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Builder">
+<meta name="mobile-web-app-capable" content="yes">
+<!-- SPINOFF / TEST BUILD. Deliberately NOT the app in daily use.
+     Storage keys are all wb_* because GitHub Pages project pages share the one
+     origin brizzlyadams.github.io: in a Safari tab this page can see (and would
+     otherwise overwrite) the real tracker's workout_history. Never reuse a
+     workout_* key here.
+     Icons: iOS ignores an SVG favicon for a Home Screen shortcut and falls back
+     to a letter tile, so an apple-touch-icon is required, OPAQUE (transparency
+     is composited onto black and masked to a rounded rect) and inset. Absolute
+     href, because a relative one is ambiguous on a project page. The 64px tab
+     icon is inlined so the app stays one self-contained file.
+     Firefox on iOS never reads these tags at all -- it only ever fetches the
+     ORIGIN root -- so this shows a letter tile there. Use Safari. -->
+<link rel="icon" type="image/png" sizes="64x64" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABAEAYAAAD6+a2dAAANP0lEQVR42u2de1iUVR7Hv+/7zgzXYRgY7giygKIh1eIlNMXV0F2sNMguYLmp2Za6amq6PrZlZQ94CXcFo7y0luBTpmGrFGJ5Rbz25AVB0FVkENDhOtzm9r77R5whh8aZAeYdifn8Mw/zvuf8zvn+fuec95z3DIda+OhY5pPpmAsL0WZomrhk2XeYxH3KnZQ5ixNc/yhRzvm3nKq6VV4S2RrwD9+ng94OmUIH0F8ys0KWIRQHuXDhWmo2VUm9A5Gl9voL3DYugFsNtS6UaW6X6b6++2JVRl1x06Oa89qTaumZq4GcX1BwxGVn5d7mnxrFW/+Og9RcarSiVTBP6EZlKf5iqT2BuTcSh2vztEWauNgj0kzJOc+lMYnyxCpZeUlka2t0W2Br/cgBAZN8Hwn66G4Y94rwefWW0N04qEtwAovuOp4IYmvH8A1zUJfgVMie8ZrkN88jxg3UZ5ovRa+GTK85eFdR9ebIaxpKe0stjUwJzPQ7F6y87Kwsa17fGGJ5QFCmegBDx7fcbL3a/OSrFwek+7eF3JhwhPqQ+gw7hRsN0xHHmXJ8f3WwuZjST3uElrRl6LJvD6pIrq4+5Owy0Hmw6/4tUYLJgoeE+UfHmwoEoz0Acbw40+WcW96KrTXD7wZWvTtLFaQO2BySLp3GhXIB3GrEc+ACYHcg75CGw0AHRzDPBo0P2Bzy/mRRlWfNzsoxI4ulmZJznjHbtyozWpqaklPmGAuELgFg6HhuJfcIN/2pP/mO857tf03KYfYv95HIZEXsELb5PgUF58bd5zpeB7DE/kxgDEpNVVK/9X2H/oY9qO8H3sv9vaSh1avupN4unAWfTK9zfoDRQNAHgGFXT1q8zy6vxX5TpcIOg13g2jhnrgGcrYUyKqAT1Uq5g3rQy2kUBoAr9DFAGhytpotp19+ob0dgeMtlab5yaQS3klvDeT8Vpt2lLdKMKjyCDDQJ0Tk00CSh4RjvU+u1xi9FOsTQMIk4Uy3/QaHPOr4DnU4XrZODI5+kPvq/X+fcuN/oQRmGOc8EgmJ2MH9mRIOExK9k1kbuo0nLl96QtHkujbnm/bNno29u9BpiiHxSH1NN1AaojRm0Y1u6BIrB0EAe2puyWxY3pc9KJX4XkIgg07mg+ICskPOys6yIHcK6A2wWV6abDejcWLCACFmoIc8Bv4KytMB2egfu3s5N7wfiL0qHaFoOjlpPnaIyhRu5m+wXbGpUDvb84neaLOAIowWjRfUjB9u6QnasC/Ez8TtNVu7IDYZjja0LbKdncHtxgV3S9SGY+J0mESHdJvnOo1D3smFCUwZ083XB7FCoDT8tLaixdIbfdzd/c+119z5Ly9vb9TCVH/En8TPxu4B8IXB23o9Z0sWAJgxTjRti0ply+orxh0BT163lCGPlMzedsXqQT8P8TaUzpYelOlnqB2Nw81HMXZWtlqZL4FGoeJl6K2zC2C8COH3XQCXgYXpDZ1eh9dc1aLdBY6khOw82rAsr0a3DIWrJxtgZO+I4lbGI6q2uylRBbC2IraBb6EZmGZ6wlX2z3wb2FvqutYn2EQyF2nWn7FmhGvG2EsDWNM9Q7NQAap0bW6O9z9BiLQSkBbLL2ShdL2RoGNGGLdzlBY8tghjEBwojPnePhihy++jEgSuBgGmheZ4ZgMtSyWLHKXxVn39a1jemtR8AKnOuT66dB1yed3L5zeEQyTUlH9SdAJQuik0aHntEavGWsfO2/8wdsLYhcblsgUMM4iOPjfYMTgGGF0zeF/YWILsUeN4tExCXSAc7DeKr2rZHGVF/ta0UUAyTRzf9DTg3Jm/qtbXA5XEna8tXAMpgxSZVIXKtXQ7ehoBAYcTnHguByJljTwU5ASGLhj3t8yOAEvTLxScS8OLd0manH4H2+tbn1UVAg7zuMeVCoBgnUMVDOeheyMMsQr2jDvitBgJjBg2WCfmy2ncguvizIX4yq7f7TngLAIfjjn6icf2vqzcXoot7mdcBFyf+7PIWAKqx7VXqY/xVrK/Ct068BUDtLvmh5kzglro48q6Mvwr2FYguRCeCKkv9TbsMo61lV0AMOCSLnnFU4KThDeYWwFh6Qtmq8wXVMYBzgaTCYTogfd73quti+5BAZgOXvjzBlL8OlK0631y9FUD5vfeZ8oMp/Y1BvTF+lP9mOVff04zMRRYcEOemRnz4B9FjfAv733TQ2PSPNBBFeWV+k8j60z9Cl2mgYaSRgLC0KzKWTpFcCSiQqxqnilCtQHxVfrm2bhfglCKWCs8ATrudMx2P/yofD8fjwod/Vb669rGaC70nQG/nbyq/tumtCe3eQFurUqvZBdS+X1mrTAaU5Yp8VSFye0tnc+nSA9jpX/D2EGjnwcQeAP0c3t8GGiJ73P9HSTjcHcY5lDgcBQSPOWVRWluXyny0p9qSufuoaFgfcr/qmCpCFQsoTtye0FiGBluVn/cAcJW7hIpHwT2gaGiyZBPgFxfs6ZECODOSCoc5AAowzlZidJOK+17tWp8KAGg91jhGlQJU5Zf/s+4M3CsfupLVuABoDmy5rjzNX0DwFgCuKvcop2W63ICi8GmSTUxS9CsTc8JSAY+Zfl+5km3m8/kqzQPATHwDAP6vhIk8UgEUIfnaJqByfFmOdpkut9mh4WLbOsbq+yR4ewbwzPMXuy1gkkI/jNL4vQt4TPRTu87uhYz7OEQHogvRiS/7vAWA/+g/XPLYCnhc9Vvk6s2X1b4D0YXoxBf8vQ3sWCBxj/OKdXmOvwr2FYguhgtJ1oa/t4EdK2IN+XePtnzFXwX7CkSX3l7pNAVvAVB3vmaR8kmgLbY5UmX1DWh9D6IL0YkveAuAyvFlObW7ddnX71ycUvWOvScgEB2ILkQnvuzzNg0k0xq5pmRjXTjgdNl5r+OLgHSwzzOu6YCTr3ir8GznziECzQryKTHA0to4Ttk1X1PXjUHSEbqb3jCd4feGf5MNH23VyjmaEUD95ZrbzcMBeVjJy3X/ApodGv7TVmb96R/B5Mug9sWqN9t3wt3cDB3THD5ynGH+QgZZCfR8O+CIOAtwShHfEp7hq/r807ZCGaQZCdS+XzlemWx8JdCY7pbqa8p/PX4bSAxYWjBLsXSfgrHXo+bm09301t7B09voA6C7EWeYztxAsLRn+b1irr7kPmN6d9d/XXoAU44xzNDuSNvSU39Qs/Y9sv6jFI63fwRhWGDyjkB/faLzRlFOz5dC239oXaSe1vVp2tz8e5re3HwN1/z5blC8B4AsxeeQ9IIuO+BI+DTP6UzSiJmT54Vv7vxtoONQVy/RGICJZ2bQv6N+RZer28k2AO1Xmu+qCzp/G3h2R15G2Rud0z/Fipon6h/m710AbwFAHD9M+fjNgU5M0pjiqUuHZPWfzaCGGG4OLRiyb31xMnBJfGLgzTb+AoG3dQDS4qPqYp8MjgVCCod97TPb/ttA8ttAZUzDodYIoM6jZr/yKJOk+L6mub7U+uXg77eBHa87Q+oj1/h+y5fVvgPRhejEF7wFAFnp629dvbkQXYhOfMH7plAy9tm5F1vpQnMJrIz7BnesbYi87CAPPXbuhehCdLI2xO800jAWqvpajVKzQLMO+dYyeO37n36qLtdlX1l1qq1isL0nIBAdiC5EJ2vZ0/u5w++09g32Pa3f3SWCOkYuGFAfaC3DZFpzRvddXGkZsO+5jMOnjwM3pl9yrZnQfwKC1LO4/vS3FUWdOhBdemv6Z6xBEz/r/c7NZp9g22/M1W7De1o/LBEeoIcJIc3t7tBA7aUV1DPosuuPFEg+4sammncQ1/5D60D1BV327fr/5dUdZpIcHVwmCqsBp93iW8L/2thL1uQSpABQv7jas/VpoHbrbVHTYV22YkTN/vp3mCSik2Ams0sQBos3h2l36F7UXoPRPUXE8cTv1EvfRiLVeW0O4jETsVM/ER4QDBPGDsq1dEgwt8CmCthfIfpZqo9QLNwkXIY4c+/XTNFe0hwtjUcuduDovteoea6j0j5+K2JwY6JS1nB2Y4ooQVTjMHnyNGs/E9jpXcwNBPVetY8qLy9HskescB+xaIWAHDNGKWgXOv0ixd1kr3P1I4vhAeCX3qpbdDei7dyLuTqaarBk7KcS6VC69CKF16gWaqGiVX9snLZMvZ4NiThq7wl+X5AA0szQMmrnvJP6lh8uWkrfKIntXAjq6AnIuXP6scJOn0arYg9rPUr/SvxK/Eyu6wOAnCIl2MAUCFYX6R8S8AI1FyNL02xdETsWQvzW4UdjB0l2WQomXYObzLVFkr12gT0Q+hgGjid+NHZwZLePjiUnTmg9dIHaCqnc1vXur5CHO3K4dK8dHau/gWTQceCgZJK4wH1EkXNTYktoU/qsVG4P9wU7KoqjttGHaMeQT/XpNtP/FFR5bbAHSA9Zhh3c8DvLUUEVUHSDL/lav4CXyL6kPX2xVLJSnOY+f/sKHKQSqPxePDzaGIbHx5Pz6Lg97L0BMYAbw7Hu1ViHmdQ571Rb69lnMHC8fuUukX6JPn2RcktySXObv315T4+P/z8xMsa/ZbzePgAAAABJRU5ErkJggg==">
+<link rel="apple-touch-icon" sizes="180x180" href="https://brizzlyadams.github.io/workout-builder/apple-touch-icon.png">
+<link rel="apple-touch-icon-precomposed" sizes="180x180" href="https://brizzlyadams.github.io/workout-builder/apple-touch-icon.png">
+<title>Workout Builder</title>
+<style>
+  :root {
+    --brand: #5B2A86;
+    --brand-light: #7A45A8;
+    --white: #FFFFFF;
+    --grey-text: #444444;
+    --grey-border: #D8DEE8;
+    --grey-bg: #F5F7FA;
+    --warm-bg: #FFF4E3;
+    --warm-text: #8A5A16;
+    --cool-bg: #E8F1FA;
+    --cool-text: #1F4E79;
+    --danger: #B23B3B;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--white);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: #111;
+    -webkit-tap-highlight-color: transparent;
+  }
+  #app { max-width: 480px; margin: 0 auto; padding-bottom: 84px; }
+
+  header.top {
+    background: var(--brand);
+    color: var(--white);
+    padding: 18px 20px 16px;
+    position: sticky; top: 0; z-index: 20;
+  }
+  header.top h1 { margin: 0 0 2px; font-size: 20px; font-weight: 700; letter-spacing: 0.2px; }
+  header.top .sub { font-size: 12.5px; color: #DCC9EE; }
+
+  .chiprow {
+    display: flex; gap: 6px; flex-wrap: wrap;
+    margin: 14px 16px 0;
+  }
+  .chip {
+    border: 1.5px solid var(--grey-border);
+    background: var(--grey-bg);
+    color: var(--brand);
+    font-size: 12.5px; font-weight: 700;
+    padding: 7px 12px; border-radius: 20px;
+    font-family: inherit;
+  }
+  .chip.active { background: var(--brand); border-color: var(--brand); color: var(--white); }
+  .chip.ghost { background: transparent; color: #8A93A6; border-style: dashed; }
+
+  .datebar { display: flex; align-items: center; gap: 10px; margin: 14px 16px 4px; }
+  .datebar label { font-size: 13px; color: var(--grey-text); font-weight: 600; }
+  .datebar input[type="date"] {
+    flex: 1; padding: 8px 10px;
+    border: 1.5px solid var(--grey-border); border-radius: 8px;
+    font-size: 14px; font-family: inherit; color: #111;
+  }
+
+  .sechead {
+    display: flex; align-items: center; justify-content: space-between;
+    margin: 16px 16px 6px;
+    font-size: 12px; font-weight: 700; letter-spacing: 0.6px;
+    text-transform: uppercase; color: #7A8296;
+  }
+  .sechead .pill { padding: 3px 9px; border-radius: 20px; font-size: 11px; letter-spacing: 0.4px; }
+  .pill.warm { background: var(--warm-bg); color: var(--warm-text); }
+  .pill.cool { background: var(--cool-bg); color: var(--cool-text); }
+  .pill.main { background: #EFE7F7; color: var(--brand); }
+
+  .exlist { padding: 4px 16px; }
+  .excard {
+    border: 1.5px solid var(--grey-border);
+    border-radius: 12px; padding: 12px 14px 14px;
+    margin-bottom: 12px; background: var(--white);
+  }
+  .excard.warm { border-left: 5px solid #E9A93D; }
+  .excard.cool { border-left: 5px solid #6FA0D0; }
+  .excard .exname { font-size: 15px; font-weight: 700; color: var(--brand); margin-bottom: 2px; }
+  .excard .extarget { font-size: 12.5px; color: var(--grey-text); margin-bottom: 10px; }
+  .excard .exlast { font-size: 12px; color: #8A93A6; margin-bottom: 8px; }
+
+  .setsrow { display: flex; gap: 8px; flex-wrap: wrap; }
+  .setcol { flex: 1 1 21%; min-width: 66px; text-align: center; }
+  .setcol .setlabel {
+    font-size: 11px; color: #7A8296; font-weight: 700;
+    margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.4px;
+  }
+  .setcol input {
+    width: 100%;
+    border: 1.5px solid var(--brand-light);
+    border-radius: 8px; padding: 8px 4px; text-align: center;
+    font-size: 15px; font-family: inherit; margin-bottom: 5px;
+  }
+  .setcol input::placeholder { color: #B7C0D1; }
+  .setcol input.soft { border-color: var(--grey-border); }
+
+  .savebar { padding: 10px 16px 4px; }
+  .savebtn {
+    width: 100%; background: var(--brand); color: var(--white);
+    border: none; border-radius: 10px; padding: 15px 0;
+    font-size: 16px; font-weight: 700; font-family: inherit;
+  }
+  .savebtn:active { background: var(--brand-light); }
+  .savebtn.grey { background: #8A93A6; }
+  .savebtn.small { padding: 11px 0; font-size: 14px; }
+  .savemsg {
+    text-align: center; color: var(--brand); font-weight: 700;
+    font-size: 13.5px; margin-top: 8px; min-height: 18px;
+  }
+
+  .viewpad { padding: 14px 16px 20px; }
+  .viewpad h2 { font-size: 15px; color: var(--brand); margin: 6px 0 12px; }
+  .empty { color: #8A93A6; font-size: 14px; text-align: center; padding: 40px 20px; line-height: 1.5; }
+
+  .session {
+    border: 1.5px solid var(--grey-border); border-radius: 12px;
+    padding: 12px 14px; margin-bottom: 10px;
+  }
+  .session .shead {
+    display: flex; justify-content: space-between;
+    font-weight: 700; color: var(--brand); font-size: 13.5px; margin-bottom: 6px;
+  }
+  .session .sline { font-size: 13px; color: #333; padding: 2px 0; }
+  .session .sline b { color: var(--brand); }
+  .session .sline.warm b { color: var(--warm-text); }
+  .session .sline.cool b { color: var(--cool-text); }
+
+  .progcard {
+    border: 1.5px solid var(--grey-border); border-radius: 12px;
+    padding: 12px 14px; margin-bottom: 10px;
+  }
+  .progcard .pname { font-weight: 700; color: var(--brand); font-size: 14.5px; margin-bottom: 4px; }
+  .progcard .pline { font-size: 13px; color: #333; }
+  .progcard .pline.dim { color: #8A93A6; }
+
+  .bigstat { display: flex; gap: 8px; margin-bottom: 10px; }
+  .bigstat div { flex: 1; text-align: center; background: var(--grey-bg); border-radius: 10px; padding: 10px 4px; }
+  .bigstat .n { font-size: 19px; font-weight: 700; color: var(--brand); }
+  .bigstat .l { font-size: 11px; color: #7A8296; text-transform: uppercase; letter-spacing: 0.4px; font-weight: 700; }
+
+  nav.bottom {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    max-width: 480px; margin: 0 auto; display: flex;
+    background: var(--white); border-top: 1.5px solid var(--grey-border); z-index: 20;
+  }
+  nav.bottom button {
+    flex: 1; padding: 12px 0 10px; border: none; background: transparent;
+    font-family: inherit; font-size: 12px; font-weight: 700; color: #8A93A6;
+  }
+  nav.bottom button.active { color: var(--brand); }
+  nav.bottom button .dot {
+    display: block; width: 5px; height: 5px; border-radius: 50%;
+    background: var(--brand); margin: 0 auto 5px; opacity: 0;
+  }
+  nav.bottom button.active .dot { opacity: 1; }
+
+  .rowitem {
+    display: flex; align-items: center; gap: 8px;
+    border: 1.5px solid var(--grey-border); border-radius: 10px;
+    padding: 9px 10px; margin-bottom: 8px;
+  }
+  .rowitem .rname { flex: 1; min-width: 0; }
+  .rowitem .rname b { display: block; font-size: 14px; color: #111; font-weight: 700; }
+  .rowitem .rname span { display: block; font-size: 11.5px; color: #8A93A6; margin-top: 1px; }
+  .iconbtn {
+    border: 1.5px solid var(--grey-border); background: var(--white);
+    border-radius: 8px; width: 30px; height: 30px; flex: none;
+    font-size: 13px; font-family: inherit; color: var(--brand); font-weight: 700;
+    padding: 0; line-height: 1;
+  }
+  .iconbtn.del { color: var(--danger); }
+  .iconbtn:disabled { opacity: 0.3; }
+
+  .btnrow { display: flex; gap: 8px; margin-top: 10px; }
+  .btnrow .savebtn { margin: 0; }
+  .addrow { display: flex; gap: 8px; margin: 0 0 14px; }
+  .addrow button {
+    flex: 1; border: 1.5px dashed var(--brand-light); background: var(--white);
+    color: var(--brand); border-radius: 10px; padding: 10px 0;
+    font-size: 13px; font-weight: 700; font-family: inherit;
+  }
+
+  .field { margin-bottom: 10px; }
+  .field label { display: block; font-size: 12px; font-weight: 700; color: var(--grey-text); margin-bottom: 4px; }
+  .field input, .field select {
+    width: 100%; border: 1.5px solid var(--grey-border); border-radius: 8px;
+    padding: 10px; font-size: 15px; font-family: inherit; background: var(--white); color: #111;
+  }
+
+  .overlay {
+    position: fixed; inset: 0; background: rgba(20,12,30,0.55);
+    z-index: 60; display: flex; align-items: flex-end; justify-content: center;
+  }
+  .sheet {
+    background: var(--white); width: 100%; max-width: 480px;
+    border-radius: 16px 16px 0 0; max-height: 88vh; display: flex; flex-direction: column;
+  }
+  .sheet .shdr {
+    padding: 14px 16px 10px; border-bottom: 1.5px solid var(--grey-border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .sheet .shdr b { font-size: 15px; color: var(--brand); }
+  .sheet .sbody { overflow-y: auto; padding: 12px 16px 20px; -webkit-overflow-scrolling: touch; }
+  .sheet .catname {
+    font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+    color: #7A8296; margin: 14px 0 6px;
+  }
+  .libitem {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 11px 12px; border: 1.5px solid var(--grey-border);
+    border-radius: 10px; margin-bottom: 6px; font-size: 14px; background: var(--white);
+    width: 100%; text-align: left; font-family: inherit; color: #111;
+  }
+  .libitem .t { font-size: 11px; color: #8A93A6; font-weight: 700; text-transform: uppercase; }
+  .searchbox {
+    width: 100%; border: 1.5px solid var(--grey-border); border-radius: 8px;
+    padding: 10px; font-size: 15px; font-family: inherit; margin-bottom: 4px;
+  }
+  .delbtn {
+    display: block; margin-top: 8px; background: none; border: none;
+    color: var(--danger); font-size: 12.5px; font-weight: 700; font-family: inherit; padding: 4px 0;
+  }
+  .note {
+    background: var(--grey-bg); border-radius: 10px; padding: 10px 12px;
+    font-size: 12.5px; color: var(--grey-text); line-height: 1.45; margin-bottom: 12px;
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="top">
+    <h1>Workout Builder</h1>
+    <div class="sub" id="headerSub">Test build — separate from Upper-Body Tracker</div>
+  </header>
+
+  <div id="view-log"></div>
+  <div id="view-routine" style="display:none;"></div>
+  <div id="view-history" style="display:none;"></div>
+  <div id="view-progress" style="display:none;"></div>
+
+  <nav class="bottom">
+    <button id="tab-log" class="active"><span class="dot"></span>Log</button>
+    <button id="tab-routine"><span class="dot"></span>Routine</button>
+    <button id="tab-history"><span class="dot"></span>History</button>
+    <button id="tab-progress"><span class="dot"></span>Progress</button>
+  </nav>
+</div>
+<div id="sheetHost"></div>
+<script>
+// ---- Exercise library ------------------------------------------------------
+// Just the menu you pick from. Nothing here is state: adding an exercise COPIES
+// name+type into the routine, so editing or trimming this list never disturbs a
+// routine already built, and never disturbs history.
+const LIBRARY = [
+  { cat: 'Cardio', items: [
+    { name: 'Treadmill walk', type: 'cardio' },
+    { name: 'Treadmill run', type: 'cardio' },
+    { name: 'Exercise bike', type: 'cardio' },
+    { name: 'Rowing machine', type: 'cardio' },
+    { name: 'Cross-trainer', type: 'cardio' },
+    { name: 'Stair climber', type: 'cardio' },
+    { name: 'Outdoor walk', type: 'cardio' },
+    { name: 'Outdoor run', type: 'cardio' },
+    { name: 'Cycling', type: 'cardio' },
+    { name: 'Swimming', type: 'cardio' },
+    { name: 'Skipping rope', type: 'cardio' },
+  ]},
+  { cat: 'Chest', items: [
+    { name: 'Chest press (machine)', type: 'weight' },
+    { name: 'Barbell bench press', type: 'weight' },
+    { name: 'Incline dumbbell press', type: 'weight' },
+    { name: 'Flat dumbbell press', type: 'weight' },
+    { name: 'Cable fly', type: 'weight' },
+    { name: 'Pec deck', type: 'weight' },
+    { name: 'Push-up', type: 'reps' },
+  ]},
+  { cat: 'Back', items: [
+    { name: 'Lat pulldown', type: 'weight' },
+    { name: 'Seated cable row', type: 'weight' },
+    { name: 'Chest-supported row', type: 'weight' },
+    { name: 'Single-arm row', type: 'weight' },
+    { name: 'Barbell row', type: 'weight' },
+    { name: 'Straight-arm pulldown', type: 'weight' },
+    { name: 'Pull-up (or assisted)', type: 'reps' },
+    { name: 'Face pull', type: 'weight' },
+  ]},
+  { cat: 'Shoulders', items: [
+    { name: 'Seated shoulder press', type: 'weight' },
+    { name: 'Dumbbell shoulder press', type: 'weight' },
+    { name: 'Lateral raise', type: 'weight' },
+    { name: 'Rear delt fly', type: 'weight' },
+    { name: 'Band pull-apart', type: 'reps' },
+    { name: 'Upright row', type: 'weight' },
+  ]},
+  { cat: 'Arms', items: [
+    { name: 'Biceps curl', type: 'weight' },
+    { name: 'Hammer curl', type: 'weight' },
+    { name: 'Preacher curl', type: 'weight' },
+    { name: 'Triceps pushdown', type: 'weight' },
+    { name: 'Overhead triceps extension', type: 'weight' },
+    { name: 'Dip (or assisted)', type: 'reps' },
+  ]},
+  { cat: 'Legs', items: [
+    { name: 'Leg press', type: 'weight' },
+    { name: 'Goblet squat', type: 'weight' },
+    { name: 'Barbell squat', type: 'weight' },
+    { name: 'Romanian deadlift', type: 'weight' },
+    { name: 'Leg extension', type: 'weight' },
+    { name: 'Leg curl', type: 'weight' },
+    { name: 'Calf raise', type: 'weight' },
+    { name: 'Walking lunge', type: 'reps' },
+    { name: 'Step-up', type: 'reps' },
+    { name: 'Hip thrust', type: 'weight' },
+  ]},
+  { cat: 'Core', items: [
+    { name: 'Plank', type: 'time' },
+    { name: 'Side plank', type: 'time' },
+    { name: 'Dead bug', type: 'reps' },
+    { name: 'Bird dog', type: 'reps' },
+    { name: 'Hanging knee raise', type: 'reps' },
+    { name: 'Cable crunch', type: 'weight' },
+    { name: 'Russian twist', type: 'reps' },
+    { name: 'Ab wheel rollout', type: 'reps' },
+  ]},
+  { cat: 'Mobility & stretch', items: [
+    { name: 'Hamstring stretch', type: 'time' },
+    { name: 'Quad stretch', type: 'time' },
+    { name: 'Chest doorway stretch', type: 'time' },
+    { name: 'Hip flexor stretch', type: 'time' },
+    { name: 'Shoulder dislocates', type: 'reps' },
+    { name: 'Cat-cow', type: 'reps' },
+    { name: 'Thoracic rotation', type: 'reps' },
+    { name: 'Foam rolling', type: 'time' },
+  ]},
+];
+
+const TYPE_LABEL = { weight: 'Weight × reps', reps: 'Reps', time: 'Time', cardio: 'Cardio' };
+const SLOTS = [
+  { key: 'warmup', label: 'Warm-up', pill: 'warm' },
+  { key: 'main', label: 'Main', pill: 'main' },
+  { key: 'cooldown', label: 'Cool-down', pill: 'cool' },
+];
+
+// ---- State -----------------------------------------------------------------
+let routines = [];
+let history = [];
+let activeRoutineId = null;
+let draft = {};
+let activeTab = 'log';
+
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+function esc(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+function todayStr() { return new Date().toISOString().slice(0, 10); }
+function num(v) { const n = parseFloat(v); return isNaN(n) ? null : n; }
+
+// ---- Storage ---------------------------------------------------------------
+// wb_* keys ONLY. Project pages share the brizzlyadams.github.io origin, so a
+// workout_* key here would read and overwrite the live tracker's data.
+function loadAll() {
+  try {
+    const r = localStorage.getItem('wb_routines');
+    routines = r ? JSON.parse(r) : [];
+    if (!Array.isArray(routines)) routines = [];
+  } catch (e) { routines = []; }
+  try {
+    const h = localStorage.getItem('wb_history');
+    history = h ? JSON.parse(h) : [];
+    if (!Array.isArray(history)) history = [];
+  } catch (e) { history = []; }
+  try {
+    const d = localStorage.getItem('wb_draft');
+    draft = d ? JSON.parse(d) : {};
+    if (!draft || typeof draft !== 'object' || Array.isArray(draft)) draft = {};
+  } catch (e) { draft = {}; }
+  try { activeRoutineId = localStorage.getItem('wb_active') || null; } catch (e) { activeRoutineId = null; }
+
+  if (routines.length === 0) routines = seedRoutines();
+  // An active id naming a routine that is gone would leave the header pointing
+  // at something unloadable, so fall back rather than trust it.
+  if (!routines.some(r => r.id === activeRoutineId)) {
+    activeRoutineId = routines[0] ? routines[0].id : null;
+  }
+}
+function saveRoutines() { try { localStorage.setItem('wb_routines', JSON.stringify(routines)); } catch (e) { console.error(e); } }
+function saveHistory() { try { localStorage.setItem('wb_history', JSON.stringify(history)); } catch (e) { console.error(e); } }
+function saveDraft() { try { localStorage.setItem('wb_draft', JSON.stringify(draft)); } catch (e) { console.error(e); } }
+function saveActive() { try { activeRoutineId ? localStorage.setItem('wb_active', activeRoutineId) : localStorage.removeItem('wb_active'); } catch (e) { console.error(e); } }
+function saveAll() { saveRoutines(); saveHistory(); saveDraft(); saveActive(); }
+
+function mkItem(name, type, slot, sets, target) {
+  return { id: uid(), name: name, type: type, slot: slot, sets: type === 'cardio' ? 1 : (sets || 3), target: target || '' };
+}
+
+// Seeded with the Upper-Body Tracker's own Day A / Day B so there is something
+// real to test against on first open, plus the cardio slots this app adds.
+function seedRoutines() {
+  return [
+    { id: uid(), name: 'Day A', items: [
+      mkItem('Treadmill walk', 'cardio', 'warmup', 1, '5-8 min easy'),
+      mkItem('Chest press (machine)', 'weight', 'main', 3, '40kg · 3 x 8'),
+      mkItem('Seated shoulder press', 'weight', 'main', 3, '37kg · 3 x 8'),
+      mkItem('Seated cable row', 'weight', 'main', 3, 'Moderate · 3 x 10'),
+      mkItem('Triceps pushdown', 'weight', 'main', 3, 'Light-mod · 2-3 x 10-12'),
+      mkItem('Rear delt fly', 'weight', 'main', 2, 'Light · 2 x 12-15'),
+      mkItem('Plank', 'time', 'main', 3, '20-30s hold'),
+      mkItem('Chest doorway stretch', 'time', 'cooldown', 2, '30s each side'),
+    ]},
+    { id: uid(), name: 'Day B', items: [
+      mkItem('Exercise bike', 'cardio', 'warmup', 1, '5-8 min easy'),
+      mkItem('Lat pulldown', 'weight', 'main', 3, '30kg · 3 x 8-10'),
+      mkItem('Chest-supported row', 'weight', 'main', 3, 'Moderate · 3 x 8-10'),
+      mkItem('Incline dumbbell press', 'weight', 'main', 3, 'Moderate · 2-3 x 10'),
+      mkItem('Biceps curl', 'weight', 'main', 3, 'Light-mod · 2-3 x 10-12'),
+      mkItem('Face pull', 'weight', 'main', 2, 'Light · 2 x 15'),
+      mkItem('Leg press', 'weight', 'main', 2, 'Light-mod · 2 x 10'),
+      mkItem('Dead bug', 'reps', 'main', 3, '8 per side'),
+      mkItem('Hamstring stretch', 'time', 'cooldown', 2, '30s each side'),
+    ]},
+  ];
+}
+
+function activeRoutine() { return routines.find(r => r.id === activeRoutineId) || null; }
+function itemsInSlot(routine, slot) { return routine.items.filter(i => i.slot === slot); }
+
+// ---- Draft -----------------------------------------------------------------
+function draftFor(routineId) {
+  if (!draft[routineId]) draft[routineId] = { date: todayStr(), dateTouched: false, values: {} };
+  const d = draft[routineId];
+  if (!d.values || typeof d.values !== 'object') d.values = {};
+  if (!d.dateTouched) d.date = todayStr();
+  return d;
+}
+
+// History is matched by NAME, not id: an exercise can be removed from a routine
+// and re-added later, and the old sessions should still line up with it.
+function lastEntriesFor(name) {
+  for (let i = history.length - 1; i >= 0; i--) {
+    const s = history[i];
+    const it = (s.items || []).find(x => x.name === name);
+    if (it && it.entries && it.entries.length) return { date: s.date, entries: it.entries };
+  }
+  return null;
+}
+
+function fieldsForType(type) {
+  if (type === 'weight') return [{ f: 'w', ph: 'kg', mode: 'decimal' }, { f: 'r', ph: 'reps', mode: 'numeric', soft: true }];
+  if (type === 'reps') return [{ f: 'r', ph: 'reps', mode: 'numeric', soft: true }];
+  if (type === 'time') return [{ f: 't', ph: 'sec', mode: 'numeric', soft: true }];
+  return [];
+}
+
+function summariseEntries(item) {
+  const type = item.type;
+  const es = item.entries || [];
+  if (type === 'cardio') {
+    const e = es[0] || {};
+    const bits = [];
+    if (e.min !== '' && e.min != null) bits.push(e.min + ' min');
+    if (e.dist !== '' && e.dist != null) bits.push(e.dist + ' km');
+    if (e.lvl !== '' && e.lvl != null) bits.push('lvl ' + e.lvl);
+    return bits.length ? bits.join(' · ') : '–';
+  }
+  return es.map(e => {
+    if (type === 'time') return (e.t !== '' && e.t != null) ? e.t + 's' : '–';
+    if (type === 'reps') return (e.r !== '' && e.r != null) ? e.r + ' reps' : '–';
+    return (e.w || '–') + '×' + (e.r || '–');
+  }).join(', ');
+}
+
+// ---- Log -------------------------------------------------------------------
+function renderLog() {
+  const el = document.getElementById('view-log');
+  let html = '';
+
+  html += '<div class="chiprow">';
+  routines.forEach(r => {
+    html += '<button class="chip ' + (r.id === activeRoutineId ? 'active' : '') + '" data-rid="' + esc(r.id) + '">' + esc(r.name) + '</button>';
+  });
+  html += '</div>';
+
+  const routine = activeRoutine();
+  if (!routine) {
+    html += '<div class="empty">No routines yet.<br>Build one from the Routine tab.</div>';
+    el.innerHTML = html;
+    bindRoutineChips(el);
+    return;
+  }
+  if (routine.items.length === 0) {
+    html += '<div class="empty">“' + esc(routine.name) + '” has no exercises yet.<br>Add some from the Routine tab.</div>';
+    el.innerHTML = html;
+    bindRoutineChips(el);
+    return;
+  }
+
+  const d = draftFor(routine.id);
+  html += '<div class="datebar"><label for="sessionDate">Date</label>'
+       + '<input type="date" id="sessionDate" value="' + esc(d.date) + '"></div>';
+
+  SLOTS.forEach(slot => {
+    const items = itemsInSlot(routine, slot.key);
+    if (items.length === 0) return;
+    html += '<div class="sechead"><span>' + slot.label + '</span>'
+         + '<span class="pill ' + slot.pill + '">' + items.length + '</span></div>';
+    html += '<div class="exlist">';
+    items.forEach(item => {
+      const vals = d.values[item.id] || [];
+      const last = lastEntriesFor(item.name);
+      const cls = slot.key === 'warmup' ? ' warm' : (slot.key === 'cooldown' ? ' cool' : '');
+      html += '<div class="excard' + cls + '">';
+      html += '<div class="exname">' + esc(item.name) + '</div>';
+      if (item.target) html += '<div class="extarget">Target: ' + esc(item.target) + '</div>';
+      if (last) html += '<div class="exlast">Last (' + esc(last.date) + '): ' + esc(summariseEntries({ type: item.type, entries: last.entries })) + '</div>';
+      html += '<div class="setsrow">';
+
+      if (item.type === 'cardio') {
+        const v = vals[0] || {};
+        const lastC = (last && last.entries[0]) || {};
+        [
+          { f: 'min', label: 'Minutes', ph: 'min', mode: 'numeric', prefill: true },
+          { f: 'dist', label: 'Distance', ph: 'km', mode: 'decimal', prefill: false },
+          { f: 'lvl', label: 'Level', ph: 'lvl', mode: 'decimal', prefill: true },
+        ].forEach(spec => {
+          const cur = v[spec.f] !== undefined ? v[spec.f] : (spec.prefill ? (lastC[spec.f] || '') : '');
+          html += '<div class="setcol"><div class="setlabel">' + spec.label + '</div>'
+               + '<input type="text" inputmode="' + spec.mode + '" class="fld" data-item="' + esc(item.id) + '"'
+               + ' data-set="1" data-field="' + spec.f + '" placeholder="' + spec.ph + '" value="' + esc(cur) + '"></div>';
+        });
+      } else {
+        const specs = fieldsForType(item.type);
+        for (let n = 1; n <= item.sets; n++) {
+          const v = vals[n - 1] || {};
+          const lastSet = (last && last.entries[n - 1]) || {};
+          html += '<div class="setcol"><div class="setlabel">Set ' + n + '</div>';
+          specs.forEach(spec => {
+            // Weight carries forward from the last session so you only retype it
+            // when it changes; reps and times always start blank.
+            const carry = spec.f === 'w' ? (lastSet.w || '') : '';
+            const cur = (v[spec.f] !== undefined && v[spec.f] !== '') ? v[spec.f] : carry;
+            html += '<input type="text" inputmode="' + spec.mode + '" class="fld' + (spec.soft ? ' soft' : '') + '"'
+                 + ' data-item="' + esc(item.id) + '" data-set="' + n + '" data-field="' + spec.f + '"'
+                 + ' placeholder="' + spec.ph + '" value="' + esc(cur) + '">';
+          });
+          html += '</div>';
+        }
+      }
+      html += '</div></div>';
+    });
+    html += '</div>';
+  });
+
+  html += '<div class="savebar"><button class="savebtn" id="saveBtn">Save Session</button>'
+       + '<div class="savemsg" id="saveMsg"></div></div>';
+
+  el.innerHTML = html;
+  bindRoutineChips(el);
+
+  document.getElementById('sessionDate').oninput = (e) => {
+    const dd = draftFor(routine.id);
+    dd.date = e.target.value;
+    dd.dateTouched = true;
+    saveDraft();
+  };
+  el.querySelectorAll('.fld').forEach(inp => {
+    inp.oninput = () => {
+      const dd = draftFor(routine.id);
+      const id = inp.dataset.item;
+      const idx = parseInt(inp.dataset.set, 10) - 1;
+      if (!dd.values[id]) dd.values[id] = [];
+      while (dd.values[id].length <= idx) dd.values[id].push({});
+      dd.values[id][idx][inp.dataset.field] = inp.value;
+      saveDraft();
+    };
+  });
+  document.getElementById('saveBtn').onclick = onSave;
+}
+
+function bindRoutineChips(el) {
+  el.querySelectorAll('.chip[data-rid]').forEach(btn => {
+    btn.onclick = () => {
+      activeRoutineId = btn.dataset.rid;
+      saveActive();
+      if (activeTab === 'log') renderLog(); else renderRoutine();
+    };
+  });
+}
+
+function onSave() {
+  const routine = activeRoutine();
+  if (!routine) return;
+  const d = draftFor(routine.id);
+  const items = [];
+  let anyFilled = false;
+
+  routine.items.forEach(item => {
+    const vals = d.values[item.id] || [];
+    const entries = [];
+    if (item.type === 'cardio') {
+      const v = vals[0] || {};
+      const min = (v.min || '').trim(), dist = (v.dist || '').trim(), lvl = (v.lvl || '').trim();
+      if (min !== '' || dist !== '' || lvl !== '') { entries.push({ min, dist, lvl }); anyFilled = true; }
+    } else {
+      for (let n = 0; n < item.sets; n++) {
+        const v = vals[n] || {};
+        const w = (v.w || '').trim(), r = (v.r || '').trim(), t = (v.t || '').trim();
+        const filled = item.type === 'weight' ? (w !== '' || r !== '')
+          : item.type === 'time' ? (t !== '') : (r !== '');
+        if (filled) { entries.push({ w, r, t }); anyFilled = true; }
+      }
+    }
+    // The session stores name/type/slot, not a reference to the routine item.
+    // Deleting or renaming the exercise later must not rewrite what happened.
+    if (entries.length) items.push({ id: item.id, name: item.name, type: item.type, slot: item.slot, entries });
+  });
+
+  const msgEl = document.getElementById('saveMsg');
+  if (!anyFilled) { msgEl.textContent = 'Enter at least one set before saving.'; return; }
+
+  history.push({ id: uid(), date: d.date || todayStr(), routineId: routine.id, routineName: routine.name, items });
+  saveHistory();
+
+  draft[routine.id] = { date: todayStr(), dateTouched: false, values: {} };
+  saveDraft();
+  renderLog();
+
+  const m = document.getElementById('saveMsg');
+  if (m) { m.textContent = 'Saved!'; setTimeout(() => { const x = document.getElementById('saveMsg'); if (x) x.textContent = ''; }, 2000); }
+}
+
+// ---- Bottom sheet ----------------------------------------------------------
+function openSheet(title, bodyHtml, onMount) {
+  const host = document.getElementById('sheetHost');
+  host.innerHTML = '<div class="overlay" id="sheetOverlay"><div class="sheet">'
+    + '<div class="shdr"><b>' + esc(title) + '</b>'
+    + '<button class="iconbtn" id="sheetClose">✕</button></div>'
+    + '<div class="sbody">' + bodyHtml + '</div></div></div>';
+  document.getElementById('sheetClose').onclick = closeSheet;
+  document.getElementById('sheetOverlay').onclick = (e) => {
+    if (e.target.id === 'sheetOverlay') closeSheet();
+  };
+  if (onMount) onMount(host);
+}
+function closeSheet() { document.getElementById('sheetHost').innerHTML = ''; }
+
+// ---- Routine builder -------------------------------------------------------
+function renderRoutine() {
+  const el = document.getElementById('view-routine');
+  let html = '<div class="chiprow">';
+  routines.forEach(r => {
+    html += '<button class="chip ' + (r.id === activeRoutineId ? 'active' : '') + '" data-rid="' + esc(r.id) + '">' + esc(r.name) + '</button>';
+  });
+  html += '<button class="chip ghost" id="newRoutineBtn">+ New routine</button></div>';
+
+  const routine = activeRoutine();
+  if (!routine) {
+    html += '<div class="empty">No routines yet.<br>Tap “+ New routine” to start one.</div>';
+    el.innerHTML = html;
+    bindRoutineChips(el);
+    document.getElementById('newRoutineBtn').onclick = onNewRoutine;
+    return;
+  }
+
+  html += '<div class="viewpad">';
+  html += '<div class="note">Exercises are copied into the routine when you add them, and each saved session keeps its own copy. Removing an exercise here never changes what is already in History.</div>';
+
+  SLOTS.forEach(slot => {
+    const items = itemsInSlot(routine, slot.key);
+    html += '<div class="sechead" style="margin-left:0;margin-right:0;"><span>' + slot.label + '</span>'
+         + '<span class="pill ' + slot.pill + '">' + items.length + '</span></div>';
+    if (items.length === 0) {
+      html += '<div class="pline dim" style="font-size:13px;color:#8A93A6;margin-bottom:8px;">Nothing here yet.</div>';
+    }
+    items.forEach((item, i) => {
+      const sub = TYPE_LABEL[item.type] + (item.type === 'cardio' ? '' : ' · ' + item.sets + ' set' + (item.sets === 1 ? '' : 's'))
+        + (item.target ? ' · ' + item.target : '');
+      html += '<div class="rowitem">'
+        + '<div class="rname" data-edit="' + esc(item.id) + '"><b>' + esc(item.name) + '</b><span>' + esc(sub) + '</span></div>'
+        + '<button class="iconbtn" data-move="up" data-id="' + esc(item.id) + '"' + (i === 0 ? ' disabled' : '') + '>▲</button>'
+        + '<button class="iconbtn" data-move="down" data-id="' + esc(item.id) + '"' + (i === items.length - 1 ? ' disabled' : '') + '>▼</button>'
+        + '<button class="iconbtn del" data-del="' + esc(item.id) + '">✕</button>'
+        + '</div>';
+    });
+    html += '<div class="addrow">'
+      + '<button data-lib="' + slot.key + '">+ From library</button>'
+      + '<button data-custom="' + slot.key + '">+ Custom</button>'
+      + '</div>';
+  });
+
+  html += '<div class="btnrow">'
+    + '<button class="savebtn small grey" id="renameRoutineBtn">Rename</button>'
+    + '<button class="savebtn small grey" id="dupRoutineBtn">Duplicate</button>'
+    + '</div>';
+  html += '<button class="delbtn" id="delRoutineBtn">Delete this routine</button>';
+  html += '</div>';
+
+  el.innerHTML = html;
+  bindRoutineChips(el);
+  document.getElementById('newRoutineBtn').onclick = onNewRoutine;
+  document.getElementById('renameRoutineBtn').onclick = () => onRenameRoutine(routine);
+  document.getElementById('dupRoutineBtn').onclick = () => onDuplicateRoutine(routine);
+  document.getElementById('delRoutineBtn').onclick = () => onDeleteRoutine(routine);
+
+  el.querySelectorAll('[data-lib]').forEach(b => { b.onclick = () => openLibrarySheet(b.dataset.lib); });
+  el.querySelectorAll('[data-custom]').forEach(b => { b.onclick = () => openCustomSheet(b.dataset.custom); });
+  el.querySelectorAll('[data-edit]').forEach(b => { b.onclick = () => openEditSheet(b.dataset.edit); });
+  el.querySelectorAll('[data-del]').forEach(b => { b.onclick = () => onRemoveItem(b.dataset.del); });
+  el.querySelectorAll('[data-move]').forEach(b => { b.onclick = () => onMoveItem(b.dataset.id, b.dataset.move); });
+}
+
+function onNewRoutine() {
+  const name = prompt('Name for the new routine?', 'Day ' + String.fromCharCode(65 + routines.length));
+  if (name === null) return;
+  const trimmed = name.trim();
+  if (!trimmed) return;
+  const r = { id: uid(), name: trimmed, items: [] };
+  routines.push(r);
+  activeRoutineId = r.id;
+  saveRoutines(); saveActive();
+  renderRoutine();
+}
+
+function onRenameRoutine(routine) {
+  const name = prompt('Rename routine', routine.name);
+  if (name === null) return;
+  const trimmed = name.trim();
+  if (!trimmed) return;
+  routine.name = trimmed;
+  saveRoutines();
+  renderRoutine();
+}
+
+// Copying a routine is how a new day usually starts: take the nearest one and
+// swap two exercises. The copy gets fresh ids for ITSELF and for every exercise
+// in it -- item ids key the in-progress draft, so a copy that shared them would
+// blur the two days together the moment you typed into one.
+function onDuplicateRoutine(routine) {
+  const name = prompt('Name for the copy?', routine.name + ' copy');
+  if (name === null) return;
+  const trimmed = name.trim();
+  if (!trimmed) return;
+  const copy = {
+    id: uid(),
+    name: trimmed,
+    items: routine.items.map(it => Object.assign({}, it, { id: uid() })),
+  };
+  // Sits next to the routine it came from rather than at the end of the list.
+  const at = routines.findIndex(r => r.id === routine.id);
+  routines.splice(at + 1, 0, copy);
+  activeRoutineId = copy.id;
+  saveRoutines(); saveActive();
+  renderRoutine();
+}
+
+function onDeleteRoutine(routine) {
+  if (!confirm('Delete the routine “' + routine.name + '”?\n\nSaved sessions in History are kept.')) return;
+  routines = routines.filter(r => r.id !== routine.id);
+  delete draft[routine.id];
+  activeRoutineId = routines[0] ? routines[0].id : null;
+  saveRoutines(); saveDraft(); saveActive();
+  renderRoutine();
+}
+
+function onRemoveItem(itemId) {
+  const routine = activeRoutine();
+  if (!routine) return;
+  const item = routine.items.find(i => i.id === itemId);
+  if (!item) return;
+  if (!confirm('Remove “' + item.name + '” from this routine?\n\nPast sessions keep it.')) return;
+  routine.items = routine.items.filter(i => i.id !== itemId);
+  const d = draft[routine.id];
+  if (d && d.values) delete d.values[itemId];
+  saveRoutines(); saveDraft();
+  renderRoutine();
+}
+
+// Items of all three slots share one array, so a move swaps with the previous
+// or next item IN THE SAME SLOT rather than the neighbouring array index.
+function onMoveItem(itemId, dir) {
+  const routine = activeRoutine();
+  if (!routine) return;
+  const item = routine.items.find(i => i.id === itemId);
+  if (!item) return;
+  const sameSlot = routine.items
+    .map((it, idx) => ({ it, idx }))
+    .filter(x => x.it.slot === item.slot);
+  const pos = sameSlot.findIndex(x => x.it.id === itemId);
+  const swapWith = dir === 'up' ? pos - 1 : pos + 1;
+  if (swapWith < 0 || swapWith >= sameSlot.length) return;
+  const a = sameSlot[pos].idx, b = sameSlot[swapWith].idx;
+  const tmp = routine.items[a];
+  routine.items[a] = routine.items[b];
+  routine.items[b] = tmp;
+  saveRoutines();
+  renderRoutine();
+}
+
+function addItemToRoutine(item) {
+  const routine = activeRoutine();
+  if (!routine) return;
+  routine.items.push(item);
+  saveRoutines();
+  closeSheet();
+  renderRoutine();
+}
+
+function openLibrarySheet(slot) {
+  const slotLabel = (SLOTS.find(s => s.key === slot) || {}).label || slot;
+  let body = '<input class="searchbox" id="libSearch" placeholder="Search exercises" autocomplete="off">'
+    + '<div id="libResults"></div>';
+  openSheet('Add to ' + slotLabel, body, () => {
+    const input = document.getElementById('libSearch');
+    const results = document.getElementById('libResults');
+    const paint = () => {
+      const q = input.value.trim().toLowerCase();
+      let h = '';
+      LIBRARY.forEach(group => {
+        const matches = group.items.filter(x => !q || x.name.toLowerCase().includes(q) || group.cat.toLowerCase().includes(q));
+        if (!matches.length) return;
+        h += '<div class="catname">' + esc(group.cat) + '</div>';
+        matches.forEach(x => {
+          h += '<button class="libitem" data-name="' + esc(x.name) + '" data-type="' + esc(x.type) + '">'
+            + '<span>' + esc(x.name) + '</span><span class="t">' + esc(TYPE_LABEL[x.type]) + '</span></button>';
+        });
+      });
+      if (!h) h = '<div class="empty">Nothing matches “' + esc(input.value) + '”.<br>Use “+ Custom” to add it by hand.</div>';
+      results.innerHTML = h;
+      results.querySelectorAll('.libitem').forEach(b => {
+        b.onclick = () => addItemToRoutine(mkItem(b.dataset.name, b.dataset.type, slot, 3, ''));
+      });
+    };
+    input.oninput = paint;
+    paint();
+  });
+}
+
+function typeOptions(sel) {
+  return Object.keys(TYPE_LABEL).map(k =>
+    '<option value="' + k + '"' + (k === sel ? ' selected' : '') + '>' + TYPE_LABEL[k] + '</option>').join('');
+}
+
+function openCustomSheet(slot) {
+  const slotLabel = (SLOTS.find(s => s.key === slot) || {}).label || slot;
+  const body = '<div class="field"><label for="cName">Exercise name</label>'
+    + '<input id="cName" placeholder="e.g. Cable pullover" autocomplete="off"></div>'
+    + '<div class="field"><label for="cType">Tracked as</label><select id="cType">' + typeOptions('weight') + '</select></div>'
+    + '<div class="field" id="cSetsWrap"><label for="cSets">Sets</label>'
+    + '<input id="cSets" type="text" inputmode="numeric" value="3"></div>'
+    + '<div class="field"><label for="cTarget">Target (optional)</label>'
+    + '<input id="cTarget" placeholder="e.g. 40kg · 3 x 8" autocomplete="off"></div>'
+    + '<button class="savebtn" id="cAdd">Add to ' + esc(slotLabel) + '</button>'
+    + '<div class="savemsg" id="cMsg"></div>';
+  openSheet('Custom exercise', body, () => {
+    const typeSel = document.getElementById('cType');
+    const setsWrap = document.getElementById('cSetsWrap');
+    const syncSets = () => { setsWrap.style.display = typeSel.value === 'cardio' ? 'none' : ''; };
+    typeSel.onchange = syncSets;
+    syncSets();
+    document.getElementById('cAdd').onclick = () => {
+      const name = document.getElementById('cName').value.trim();
+      if (!name) { document.getElementById('cMsg').textContent = 'Give it a name first.'; return; }
+      const type = typeSel.value;
+      let sets = parseInt(document.getElementById('cSets').value, 10);
+      if (isNaN(sets) || sets < 1) sets = 1;
+      if (sets > 6) sets = 6;
+      addItemToRoutine(mkItem(name, type, slot, sets, document.getElementById('cTarget').value.trim()));
+    };
+  });
+}
+
+function openEditSheet(itemId) {
+  const routine = activeRoutine();
+  if (!routine) return;
+  const item = routine.items.find(i => i.id === itemId);
+  if (!item) return;
+  const slotOpts = SLOTS.map(s => '<option value="' + s.key + '"' + (s.key === item.slot ? ' selected' : '') + '>' + s.label + '</option>').join('');
+  const body = '<div class="field"><label for="eName">Exercise name</label>'
+    + '<input id="eName" value="' + esc(item.name) + '" autocomplete="off"></div>'
+    + '<div class="field"><label for="eType">Tracked as</label><select id="eType">' + typeOptions(item.type) + '</select></div>'
+    + '<div class="field"><label for="eSlot">Section</label><select id="eSlot">' + slotOpts + '</select></div>'
+    + '<div class="field" id="eSetsWrap"><label for="eSets">Sets</label>'
+    + '<input id="eSets" type="text" inputmode="numeric" value="' + esc(item.sets) + '"></div>'
+    + '<div class="field"><label for="eTarget">Target (optional)</label>'
+    + '<input id="eTarget" value="' + esc(item.target) + '" autocomplete="off"></div>'
+    + '<button class="savebtn" id="eSave">Save changes</button>'
+    + '<div class="savemsg" id="eMsg"></div>';
+  openSheet('Edit exercise', body, () => {
+    const typeSel = document.getElementById('eType');
+    const setsWrap = document.getElementById('eSetsWrap');
+    const syncSets = () => { setsWrap.style.display = typeSel.value === 'cardio' ? 'none' : ''; };
+    typeSel.onchange = syncSets;
+    syncSets();
+    document.getElementById('eSave').onclick = () => {
+      const name = document.getElementById('eName').value.trim();
+      if (!name) { document.getElementById('eMsg').textContent = 'Give it a name first.'; return; }
+      let sets = parseInt(document.getElementById('eSets').value, 10);
+      if (isNaN(sets) || sets < 1) sets = 1;
+      if (sets > 6) sets = 6;
+      item.name = name;
+      item.type = typeSel.value;
+      item.slot = document.getElementById('eSlot').value;
+      item.sets = item.type === 'cardio' ? 1 : sets;
+      item.target = document.getElementById('eTarget').value.trim();
+      saveRoutines();
+      closeSheet();
+      renderRoutine();
+    };
+  });
+}
+
+// ---- History ---------------------------------------------------------------
+function renderHistory() {
+  const el = document.getElementById('view-history');
+  const indexed = history.map((s, i) => ({ s, i })).sort((a, b) => (a.s.date < b.s.date ? 1 : -1));
+  let html = '<div class="viewpad"><h2>Past sessions</h2>';
+  if (indexed.length === 0) {
+    html += '<div class="empty">No sessions logged yet.<br>Log your first one from the Log tab.</div>';
+  } else {
+    indexed.forEach(({ s, i }) => {
+      html += '<div class="session"><div class="shead"><span>' + esc(s.date) + '</span>'
+           + '<span>' + esc(s.routineName || '') + '</span></div>';
+      (s.items || []).forEach(item => {
+        const cls = item.slot === 'warmup' ? ' warm' : (item.slot === 'cooldown' ? ' cool' : '');
+        html += '<div class="sline' + cls + '"><b>' + esc(item.name) + '</b> — ' + esc(summariseEntries(item)) + '</div>';
+      });
+      html += '<button class="delbtn" data-idx="' + i + '">Delete session</button></div>';
+    });
+  }
+  html += '</div>';
+  el.innerHTML = html;
+
+  el.querySelectorAll('.delbtn').forEach(btn => {
+    btn.onclick = () => {
+      if (!confirm('Delete this session? This cannot be undone.')) return;
+      history.splice(parseInt(btn.dataset.idx, 10), 1);
+      saveHistory();
+      renderHistory();
+    };
+  });
+}
+
+// ---- Progress --------------------------------------------------------------
+// Aggregated by exercise NAME across every session, so it still reports on
+// exercises that have since been removed from a routine.
+function aggregate() {
+  const byName = {};
+  let cardioMin = 0, cardioKm = 0, cardioCount = 0;
+  history.forEach(s => {
+    (s.items || []).forEach(item => {
+      if (!byName[item.name]) byName[item.name] = { name: item.name, type: item.type, slot: item.slot, sets: 0, best: null, totalMin: 0 };
+      const agg = byName[item.name];
+      (item.entries || []).forEach(e => {
+        agg.sets++;
+        if (item.type === 'cardio') {
+          const m = num(e.min), km = num(e.dist);
+          if (m !== null) { agg.totalMin += m; cardioMin += m; }
+          if (km !== null) cardioKm += km;
+          cardioCount++;
+          if (m !== null && (agg.best === null || m > agg.best)) agg.best = m;
+        } else {
+          const raw = item.type === 'time' ? e.t : (item.type === 'reps' ? e.r : e.w);
+          const v = num(raw);
+          if (v !== null && (agg.best === null || v > agg.best)) agg.best = v;
+        }
+      });
+    });
+  });
+  return { byName, cardioMin, cardioKm, cardioCount };
+}
+
+function bestLabel(agg) {
+  if (agg.best === null) return 'no numbers yet';
+  if (agg.type === 'cardio') return 'longest ' + agg.best + ' min · ' + Math.round(agg.totalMin) + ' min total';
+  if (agg.type === 'time') return 'best ' + agg.best + 's';
+  if (agg.type === 'reps') return 'best ' + agg.best + ' reps';
+  return 'best ' + agg.best + 'kg';
+}
+
+function renderProgress() {
+  const el = document.getElementById('view-progress');
+  const { byName, cardioMin, cardioKm, cardioCount } = aggregate();
+  const names = Object.keys(byName).sort((a, b) => a.localeCompare(b));
+
+  let html = '<div class="viewpad"><h2>Progress</h2>';
+  html += '<div class="bigstat">'
+    + '<div><div class="n">' + history.length + '</div><div class="l">Sessions</div></div>'
+    + '<div><div class="n">' + Math.round(cardioMin) + '</div><div class="l">Cardio min</div></div>'
+    + '<div><div class="n">' + (Math.round(cardioKm * 10) / 10) + '</div><div class="l">Cardio km</div></div>'
+    + '</div>';
+  if (cardioCount === 0) {
+    html += '<div class="pline dim" style="font-size:12.5px;color:#8A93A6;margin-bottom:12px;">No cardio logged yet — add a warm-up or cool-down from the Routine tab.</div>';
+  }
+
+  if (names.length === 0) {
+    html += '<div class="empty">Nothing logged yet.</div>';
+  } else {
+    SLOTS.forEach(slot => {
+      const inSlot = names.filter(n => byName[n].slot === slot.key);
+      if (!inSlot.length) return;
+      html += '<div class="sechead" style="margin-left:0;margin-right:0;"><span>' + slot.label + '</span>'
+           + '<span class="pill ' + slot.pill + '">' + inSlot.length + '</span></div>';
+      inSlot.forEach(n => {
+        const agg = byName[n];
+        html += '<div class="progcard"><div class="pname">' + esc(agg.name) + '</div>'
+             + '<div class="pline">' + esc(bestLabel(agg)) + ' · ' + agg.sets + ' logged</div></div>';
+      });
+    });
+  }
+
+  html += backupPanelHtml();
+  html += '</div>';
+  el.innerHTML = html;
+  bindBackupPanel();
+}
+
+// ---- Backup & Restore ------------------------------------------------------
+// Four routes on purpose. A download inside an iOS standalone web app is the
+// one path that has never been proven on a real device, so the clipboard route
+// stays as the one that always works.
+// Backups carry an envelope {app, v, exported, data} so a future format change
+// is detectable rather than silently mis-restored.
+const BACKUP_APP = 'workout-builder';
+const BACKUP_V = 1;
+
+function backupData() { return { routines: routines, history: history, active: activeRoutineId }; }
+
+function backupText() {
+  return JSON.stringify({
+    app: BACKUP_APP, v: BACKUP_V, exported: new Date().toISOString(),
+    data: backupData()
+  }, null, 2);
+}
+
+function backupFilename() {
+  const d = new Date(), p = (n) => String(n).padStart(2, '0');
+  return BACKUP_APP + '-' + d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate())
+    + '-' + p(d.getHours()) + p(d.getMinutes()) + '.json';
+}
+
+function downloadBackup(msgEl) {
+  try {
+    const blob = new Blob([backupText()], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = backupFilename();
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    if (msgEl) msgEl.textContent = 'Saved ' + backupFilename();
+  } catch (e) {
+    if (msgEl) msgEl.textContent = 'Download blocked — use Copy backup text instead.';
+  }
+}
+
+function restoreFromText(text) {
+  let parsed;
+  try { parsed = JSON.parse(text); }
+  catch (e) { return "That doesn't look like a valid backup."; }
+  if (parsed && parsed.app) {
+    if (parsed.app === 'workout-tracker') return 'That is an Upper-Body Tracker backup — use “Import from Upper-Body Tracker” below.';
+    if (parsed.app !== BACKUP_APP) return 'That backup is from ' + parsed.app + ', not this app.';
+    return applyBackup(parsed.data);
+  }
+  return applyBackup(parsed);
+}
+
+function applyBackup(data) {
+  if (!data || typeof data !== 'object' || Array.isArray(data)) return "That doesn't look like a valid backup.";
+  if (!Array.isArray(data.routines) || !Array.isArray(data.history)) return "That doesn't look like a valid backup.";
+  routines = data.routines;
+  history = data.history;
+  // Drop an active id the backup does not actually contain, rather than leaving
+  // the app naming a routine it cannot load.
+  activeRoutineId = routines.some(r => r.id === data.active) ? data.active : (routines[0] ? routines[0].id : null);
+  draft = {};
+  saveAll();
+  renderProgress();
+  return 'Restored ' + routines.length + ' routine' + (routines.length === 1 ? '' : 's')
+    + ' and ' + history.length + ' session' + (history.length === 1 ? '' : 's') + '.';
+}
+
+// The old tracker keyed sets by exercise CODE and stored a bare array of
+// sessions. Convert rather than reject, so a tracker backup is not a dead end.
+function importTrackerBackup(text) {
+  let parsed;
+  try { parsed = JSON.parse(text); }
+  catch (e) { return "That doesn't look like a valid backup."; }
+  let sessions = parsed;
+  if (parsed && parsed.app) {
+    if (parsed.app !== 'workout-tracker') return 'That backup is from ' + parsed.app + ', not the Upper-Body Tracker.';
+    sessions = parsed.data;
+  }
+  if (!Array.isArray(sessions)) return "That doesn't look like an Upper-Body Tracker backup.";
+
+  let added = 0;
+  sessions.forEach(sess => {
+    if (!sess || !sess.sets) return;
+    const items = [];
+    Object.keys(sess.sets).forEach(code => {
+      const rec = sess.sets[code];
+      if (!rec || !Array.isArray(rec.entries)) return;
+      const first = rec.entries[0] || {};
+      const type = (first.t !== '' && first.t != null) ? 'time'
+        : ((first.w !== '' && first.w != null) ? 'weight' : 'reps');
+      items.push({
+        id: uid(),
+        name: rec.variant || code,
+        type: type, slot: 'main',
+        entries: rec.entries.map(e => ({ w: e.w || '', r: e.r || '', t: e.t || '' })),
+      });
+    });
+    if (!items.length) return;
+    history.push({
+      id: uid(), date: sess.date || todayStr(), routineId: null,
+      routineName: sess.day ? 'Day ' + sess.day : 'Imported', items: items,
+    });
+    added++;
+  });
+
+  history.sort((a, b) => (a.date < b.date ? -1 : 1));
+  saveHistory();
+  renderProgress();
+  return added === 0 ? 'Nothing in that backup to import.'
+    : 'Imported ' + added + ' session' + (added === 1 ? '' : 's') + ' from the tracker.';
+}
+
+function backupPanelHtml() {
+  return '<div class="progcard" style="margin-top:16px;">'
+    + '<div class="pname">Backup &amp; Restore</div>'
+    + '<div class="pline dim">Your routines and history live only on this device. A Home Screen app keeps its own copy, and <b>deleting the icon deletes the data</b> — so keep a backup somewhere else.</div>'
+    + '<button class="savebtn" id="downloadBackupBtn" style="margin-top:8px;">Download backup file</button>'
+    + '<button class="savebtn" id="copyBackupBtn" style="margin-top:8px;">Copy backup text</button>'
+    + '<textarea id="backupOutput" readonly style="width:100%;margin-top:8px;height:70px;border:1.5px solid var(--grey-border);border-radius:8px;padding:8px;font-family:monospace;font-size:11px;box-sizing:border-box;">' + esc(backupText()) + '</textarea>'
+    + '<div class="savemsg" id="backupMsg"></div>'
+    + '<div class="pline dim" style="margin-top:14px;">Restore from a file:</div>'
+    + '<input type="file" id="restoreFile" accept="application/json,.json" style="margin-top:6px;font-size:12px;">'
+    + '<div class="pline dim" style="margin-top:12px;">…or paste a backup:</div>'
+    + '<textarea id="restoreInput" placeholder="Paste backup text here" style="width:100%;margin-top:8px;height:70px;border:1.5px solid var(--grey-border);border-radius:8px;padding:8px;font-family:monospace;font-size:11px;box-sizing:border-box;"></textarea>'
+    + '<button class="savebtn grey" id="restoreBtn" style="margin-top:8px;">Restore from Backup</button>'
+    + '<div class="pline dim" style="margin-top:16px;">Moving over from the old app? Paste an <b>Upper-Body Tracker</b> backup above and use this instead — its sessions are converted and <b>added</b> to what is already here.</div>'
+    + '<button class="savebtn grey" id="importTrackerBtn" style="margin-top:8px;">Import from Upper-Body Tracker</button>'
+    + '</div>';
+}
+
+function bindBackupPanel() {
+  const bMsg = () => document.getElementById('backupMsg');
+  const dlBtn = document.getElementById('downloadBackupBtn');
+  if (dlBtn) dlBtn.onclick = () => downloadBackup(bMsg());
+
+  const cpBtn = document.getElementById('copyBackupBtn');
+  if (cpBtn) cpBtn.onclick = async () => {
+    try {
+      await navigator.clipboard.writeText(backupText());
+      bMsg().textContent = 'Backup copied to the clipboard.';
+    } catch (e) {
+      const ta = document.getElementById('backupOutput');
+      ta.focus(); ta.select();
+      bMsg().textContent = 'Copy failed — select the text above and copy it by hand.';
+    }
+  };
+
+  const fileInput = document.getElementById('restoreFile');
+  if (fileInput) fileInput.onchange = () => {
+    const f = fileInput.files && fileInput.files[0];
+    if (!f) return;
+    const r = new FileReader();
+    r.onload = () => { bMsg().textContent = restoreFromText(String(r.result)); fileInput.value = ''; };
+    r.onerror = () => { bMsg().textContent = 'Could not read that file.'; };
+    r.readAsText(f);
+  };
+
+  const rsBtn = document.getElementById('restoreBtn');
+  if (rsBtn) rsBtn.onclick = () => {
+    const input = document.getElementById('restoreInput').value.trim();
+    if (!input) { bMsg().textContent = 'Paste a backup first.'; return; }
+    if (!confirm('Restore will REPLACE the routines and history on this device. Continue?')) return;
+    bMsg().textContent = restoreFromText(input);
+  };
+
+  const imBtn = document.getElementById('importTrackerBtn');
+  if (imBtn) imBtn.onclick = () => {
+    const input = document.getElementById('restoreInput').value.trim();
+    if (!input) { bMsg().textContent = 'Paste a tracker backup first.'; return; }
+    bMsg().textContent = importTrackerBackup(input);
+  };
+}
+
+// ---- Tabs ------------------------------------------------------------------
+const TABS = ['log', 'routine', 'history', 'progress'];
+function showTab(tab) {
+  activeTab = tab;
+  TABS.forEach(t => {
+    document.getElementById('view-' + t).style.display = t === tab ? '' : 'none';
+    document.getElementById('tab-' + t).classList.toggle('active', t === tab);
+  });
+  if (tab === 'log') renderLog();
+  if (tab === 'routine') renderRoutine();
+  if (tab === 'history') renderHistory();
+  if (tab === 'progress') renderProgress();
+}
+TABS.forEach(t => { document.getElementById('tab-' + t).onclick = () => showTab(t); });
+
+(function init() {
+  loadAll();
+  saveRoutines(); saveActive();
+  showTab('log');
+})();
+</script>
+</body>
+</html>
