@@ -408,11 +408,18 @@ function loadAll() {
     activeRoutineId = routines[0] ? routines[0].id : null;
   }
 }
-function saveRoutines() { try { localStorage.setItem('wb_routines', JSON.stringify(routines)); } catch (e) { console.error(e); } }
-function saveHistory() { try { localStorage.setItem('wb_history', JSON.stringify(history)); } catch (e) { console.error(e); } }
-function saveDraft() { try { localStorage.setItem('wb_draft', JSON.stringify(draft)); } catch (e) { console.error(e); } }
-function saveActive() { try { activeRoutineId ? localStorage.setItem('wb_active', activeRoutineId) : localStorage.removeItem('wb_active'); } catch (e) { console.error(e); } }
-function saveAll() { saveRoutines(); saveHistory(); saveDraft(); saveActive(); }
+// Each returns true on success, false if the write failed (storage full). A
+// caller that changed state first must undo it on false, or memory and storage
+// diverge and the next incidental save persists the divergence. Only the
+// session save, restore and import check the result today; routine authoring
+// (saveRoutines call sites) still saves silently -- see CLAUDE.md, Open.
+const MSG_FULL = "Could not save — this site's storage is full. Back up, then free space.";
+function saveRoutines() { try { localStorage.setItem('wb_routines', JSON.stringify(routines)); return true; } catch (e) { console.error(e); return false; } }
+function saveHistory() { try { localStorage.setItem('wb_history', JSON.stringify(history)); return true; } catch (e) { console.error(e); return false; } }
+function saveDraft() { try { localStorage.setItem('wb_draft', JSON.stringify(draft)); return true; } catch (e) { console.error(e); return false; } }
+function saveActive() { try { activeRoutineId ? localStorage.setItem('wb_active', activeRoutineId) : localStorage.removeItem('wb_active'); return true; } catch (e) { console.error(e); return false; } }
+// All four always run (no short-circuit), then the AND.
+function saveAll() { const a = saveRoutines(), b = saveHistory(), c = saveDraft(), d = saveActive(); return a && b && c && d; }
 
 function mkItem(name, type, slot, sets, target) {
   return { id: uid(), name: name, type: type, slot: slot, sets: type === 'cardio' ? 1 : (sets || 3), target: target || '' };
@@ -643,7 +650,12 @@ function onSave() {
   if (!anyFilled) { msgEl.textContent = 'Enter at least one set before saving.'; return; }
 
   history.push({ id: uid(), date: d.date || todayStr(), routineId: routine.id, routineName: routine.name, items });
-  saveHistory();
+  if (!saveHistory()) {
+    // Storage refused it: take it back out of memory and KEEP the draft.
+    history.pop();
+    msgEl.textContent = MSG_FULL;
+    return;
+  }
 
   draft[routine.id] = { date: todayStr(), dateTouched: false, values: {} };
   saveDraft();
@@ -957,8 +969,12 @@ function renderHistory() {
   el.querySelectorAll('.delbtn').forEach(btn => {
     btn.onclick = () => {
       if (!confirm('Delete this session? This cannot be undone.')) return;
-      history.splice(parseInt(btn.dataset.idx, 10), 1);
-      saveHistory();
+      const idx = parseInt(btn.dataset.idx, 10);
+      const removed = history.splice(idx, 1);
+      if (!saveHistory()) {
+        history.splice(idx, 0, removed[0]);   // put it back exactly where it was
+        alert(MSG_FULL);
+      }
       renderHistory();
     };
   });
@@ -1069,35 +1085,64 @@ function downloadBackup(msgEl) {
     const a = document.createElement('a');
     a.href = url; a.download = backupFilename();
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    // Revoked late: Safari can still be reading the blob when click() returns.
+    setTimeout(() => URL.revokeObjectURL(url), 30000);
     if (msgEl) msgEl.textContent = 'Saved ' + backupFilename();
   } catch (e) {
     if (msgEl) msgEl.textContent = 'Download blocked — use Copy backup text instead.';
   }
 }
 
-function restoreFromText(text) {
-  let parsed;
-  try { parsed = JSON.parse(text); }
-  catch (e) { return "That doesn't look like a valid backup."; }
-  if (parsed && parsed.app) {
-    if (parsed.app === 'workout-tracker') return 'That is an Upper-Body Tracker backup — use “Import from Upper-Body Tracker” below.';
-    if (parsed.app !== BACKUP_APP) return 'That backup is from ' + parsed.app + ', not this app.';
-    return applyBackup(parsed.data);
-  }
-  return applyBackup(parsed);
+// Restore is parse -> validate -> confirm -> apply. Validation happens BEFORE
+// the confirm so a garbage paste never prompts, and apply rolls back if the
+// write fails, so a full store cannot leave memory and storage disagreeing.
+const CONFIRM_MSG = 'Restore will REPLACE the routines and history on this device. Continue?';
+
+function validBackup(data) {
+  return !!data && typeof data === 'object' && !Array.isArray(data)
+    && Array.isArray(data.routines) && Array.isArray(data.history);
 }
 
+// Returns {error} or {data}.
+function parseBackup(text) {
+  let parsed;
+  try { parsed = JSON.parse(text); }
+  catch (e) { return { error: "That doesn't look like a valid backup." }; }
+  let data = parsed;
+  if (parsed && parsed.app) {
+    if (parsed.app === 'workout-tracker') return { error: 'That is an Upper-Body Tracker backup — use “Import from Upper-Body Tracker” below.' };
+    if (parsed.app !== BACKUP_APP) return { error: 'That backup is from ' + parsed.app + ', not this app.' };
+    data = parsed.data;
+  }
+  if (!validBackup(data)) return { error: "That doesn't look like a valid backup." };
+  return { data };
+}
+
+// `confirmed` = the caller already asked (the file path confirms inside its
+// own click gesture, before reading).
+function restoreFromText(text, confirmed) {
+  const p = parseBackup(text);
+  if (p.error) return p.error;
+  if (!confirmed && !confirm(CONFIRM_MSG)) return 'Restore cancelled — nothing changed.';
+  return applyBackup(p.data);
+}
+
+// Trusts its input (parseBackup validated it). Snapshot, assign, save; on a
+// failed write put the snapshot back and re-persist it (best effort, result
+// ignored) so a write that succeeded for one key cannot stay half-restored.
 function applyBackup(data) {
-  if (!data || typeof data !== 'object' || Array.isArray(data)) return "That doesn't look like a valid backup.";
-  if (!Array.isArray(data.routines) || !Array.isArray(data.history)) return "That doesn't look like a valid backup.";
+  const prev = { routines, history, activeRoutineId, draft };
   routines = data.routines;
   history = data.history;
   // Drop an active id the backup does not actually contain, rather than leaving
   // the app naming a routine it cannot load.
   activeRoutineId = routines.some(r => r.id === data.active) ? data.active : (routines[0] ? routines[0].id : null);
   draft = {};
-  saveAll();
+  if (!saveAll()) {
+    ({ routines, history, activeRoutineId, draft } = prev);
+    saveAll();
+    return MSG_FULL + ' Nothing restored.';
+  }
   renderProgress();
   return 'Restored ' + routines.length + ' routine' + (routines.length === 1 ? '' : 's')
     + ' and ' + history.length + ' session' + (history.length === 1 ? '' : 's') + '.';
@@ -1116,6 +1161,9 @@ function importTrackerBackup(text) {
   }
   if (!Array.isArray(sessions)) return "That doesn't look like an Upper-Body Tracker backup.";
 
+  // history is mutated IN PLACE below (push, sort), so the snapshot must be a
+  // copy -- a reference would roll back nothing.
+  const prev = history.slice();
   let added = 0;
   sessions.forEach(sess => {
     if (!sess || !sess.sets) return;
@@ -1141,11 +1189,15 @@ function importTrackerBackup(text) {
     added++;
   });
 
+  if (added === 0) return 'Nothing in that backup to import.';
   history.sort((a, b) => (a.date < b.date ? -1 : 1));
-  saveHistory();
+  if (!saveHistory()) {
+    history = prev;
+    saveHistory();
+    return MSG_FULL + ' Nothing imported.';
+  }
   renderProgress();
-  return added === 0 ? 'Nothing in that backup to import.'
-    : 'Imported ' + added + ' session' + (added === 1 ? '' : 's') + ' from the tracker.';
+  return 'Imported ' + added + ' session' + (added === 1 ? '' : 's') + ' from the tracker.';
 }
 
 function backupPanelHtml() {
@@ -1187,8 +1239,14 @@ function bindBackupPanel() {
   if (fileInput) fileInput.onchange = () => {
     const f = fileInput.files && fileInput.files[0];
     if (!f) return;
+    // Confirm HERE, inside the change gesture: a confirm() from inside
+    // FileReader.onload is outside any user gesture and Safari may suppress
+    // it (returning false, i.e. a silent "cancelled").
+    if (!confirm(CONFIRM_MSG)) { fileInput.value = ''; return; }
     const r = new FileReader();
-    r.onload = () => { bMsg().textContent = restoreFromText(String(r.result)); fileInput.value = ''; };
+    // Result first, THEN look the element up: a successful restore re-renders
+    // this panel, and a bMsg() taken before the call points at the old node.
+    r.onload = () => { const m = restoreFromText(String(r.result), true); bMsg().textContent = m; };
     r.onerror = () => { bMsg().textContent = 'Could not read that file.'; };
     r.readAsText(f);
   };
@@ -1197,15 +1255,16 @@ function bindBackupPanel() {
   if (rsBtn) rsBtn.onclick = () => {
     const input = document.getElementById('restoreInput').value.trim();
     if (!input) { bMsg().textContent = 'Paste a backup first.'; return; }
-    if (!confirm('Restore will REPLACE the routines and history on this device. Continue?')) return;
-    bMsg().textContent = restoreFromText(input);
+    const m = restoreFromText(input);   // validates, then confirms, then applies
+    bMsg().textContent = m;
   };
 
   const imBtn = document.getElementById('importTrackerBtn');
   if (imBtn) imBtn.onclick = () => {
     const input = document.getElementById('restoreInput').value.trim();
     if (!input) { bMsg().textContent = 'Paste a tracker backup first.'; return; }
-    bMsg().textContent = importTrackerBackup(input);
+    const m = importTrackerBackup(input);
+    bMsg().textContent = m;
   };
 }
 
