@@ -108,14 +108,15 @@
     font-size: 11px; color: #7A8296; font-weight: 700;
     margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.4px;
   }
-  .setcol input {
+  .setcol input, .setcol select {
     width: 100%;
     border: 1.5px solid var(--brand-light);
-    border-radius: 8px; padding: 8px 4px; text-align: center;
+    border-radius: 8px; padding: 8px 4px; text-align: center; text-align-last: center;
     font-size: 15px; font-family: inherit; margin-bottom: 5px;
   }
-  .setcol input::placeholder { color: #B7C0D1; }
-  .setcol input.soft { border-color: var(--grey-border); }
+  .setcol select { -webkit-appearance: none; appearance: none; background: #fff; color: inherit; }
+  .setcol input::placeholder, .setcol select.empty { color: #B7C0D1; }
+  .setcol input.soft, .setcol select.soft { border-color: var(--grey-border); }
 
   .savebar { padding: 10px 16px 4px; }
   .savebtn {
@@ -377,6 +378,46 @@ function esc(s) {
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
+
+// Session entry is a <select> so iOS opens its scroll wheel instead of the
+// keyboard. Values are stored as the same strings the text fields produced.
+// A stored value that is not on the wheel's grid (an old typed "42.3") is
+// inserted as its own option so it still shows and saves unchanged.
+const WHEELS = {
+  w:    { ph: 'kg',   min: 0, max: 200, step: 0.5, dec: 1 },
+  r:    { ph: 'reps', min: 0, max: 50,  step: 1,   dec: 0 },
+  t:    { ph: 'sec',  min: 0, max: 300, step: 1,   dec: 0 },
+  min:  { ph: 'min',  min: 0, max: 120, step: 1,   dec: 0 },
+  dist: { ph: 'km',   min: 0, max: 30,  step: 0.1, dec: 1 },
+  lvl:  { ph: 'lvl',  min: 0, max: 30,  step: 0.5, dec: 1 },
+};
+function wheelHtml(field, cls, attrs, value) {
+  const spec = WHEELS[field];
+  const cur = String(value == null ? '' : value).trim();
+  const num = cur !== '' && isFinite(cur) ? Number(cur) : null;
+  let html = '<select class="fld' + (cls ? ' ' + cls : '') + (cur === '' ? ' empty' : '')
+           + '" data-field="' + field + '" ' + attrs + '>';
+  html += '<option value="">' + spec.ph + '</option>';
+  let placed = cur === '';
+  const extra = '<option value="' + esc(cur) + '" selected>' + esc(cur) + '</option>';
+  const steps = Math.round((spec.max - spec.min) / spec.step);
+  for (let i = 0; i <= steps; i++) {
+    const v = Number((spec.min + i * spec.step).toFixed(spec.dec));
+    if (!placed && num !== null && num < v) { html += extra; placed = true; }
+    const sel = !placed && num === v;
+    if (sel) placed = true;
+    html += '<option value="' + v + '"' + (sel ? ' selected' : '') + '>' + v + '</option>';
+  }
+  if (!placed) html += extra;
+  return html + '</select>';
+}
+// Sets count for the add / edit sheets: 1-6, the cap the sheets already enforce.
+function setsOptions(current) {
+  const cur = parseInt(current, 10);
+  let html = '';
+  for (let n = 1; n <= 6; n++) html += '<option value="' + n + '"' + (n === cur ? ' selected' : '') + '>' + n + '</option>';
+  return html;
+}
 function todayStr() { return new Date().toISOString().slice(0, 10); }
 function num(v) { const n = parseFloat(v); return isNaN(n) ? null : n; }
 
@@ -477,9 +518,9 @@ function lastEntriesFor(name) {
 }
 
 function fieldsForType(type) {
-  if (type === 'weight') return [{ f: 'w', ph: 'kg', mode: 'decimal' }, { f: 'r', ph: 'reps', mode: 'numeric', soft: true }];
-  if (type === 'reps') return [{ f: 'r', ph: 'reps', mode: 'numeric', soft: true }];
-  if (type === 'time') return [{ f: 't', ph: 'sec', mode: 'numeric', soft: true }];
+  if (type === 'weight') return [{ f: 'w' }, { f: 'r', soft: true }];
+  if (type === 'reps') return [{ f: 'r', soft: true }];
+  if (type === 'time') return [{ f: 't', soft: true }];
   return [];
 }
 
@@ -550,14 +591,13 @@ function renderLog() {
         const v = vals[0] || {};
         const lastC = (last && last.entries[0]) || {};
         [
-          { f: 'min', label: 'Minutes', ph: 'min', mode: 'numeric', prefill: true },
-          { f: 'dist', label: 'Distance', ph: 'km', mode: 'decimal', prefill: false },
-          { f: 'lvl', label: 'Level', ph: 'lvl', mode: 'decimal', prefill: true },
+          { f: 'min', label: 'Minutes', prefill: true },
+          { f: 'dist', label: 'Distance', prefill: false },
+          { f: 'lvl', label: 'Level', prefill: true },
         ].forEach(spec => {
           const cur = v[spec.f] !== undefined ? v[spec.f] : (spec.prefill ? (lastC[spec.f] || '') : '');
           html += '<div class="setcol"><div class="setlabel">' + spec.label + '</div>'
-               + '<input type="text" inputmode="' + spec.mode + '" class="fld" data-item="' + esc(item.id) + '"'
-               + ' data-set="1" data-field="' + spec.f + '" placeholder="' + spec.ph + '" value="' + esc(cur) + '"></div>';
+               + wheelHtml(spec.f, '', 'data-item="' + esc(item.id) + '" data-set="1"', cur) + '</div>';
         });
       } else {
         const specs = fieldsForType(item.type);
@@ -570,9 +610,7 @@ function renderLog() {
             // when it changes; reps and times always start blank.
             const carry = spec.f === 'w' ? (lastSet.w || '') : '';
             const cur = (v[spec.f] !== undefined && v[spec.f] !== '') ? v[spec.f] : carry;
-            html += '<input type="text" inputmode="' + spec.mode + '" class="fld' + (spec.soft ? ' soft' : '') + '"'
-                 + ' data-item="' + esc(item.id) + '" data-set="' + n + '" data-field="' + spec.f + '"'
-                 + ' placeholder="' + spec.ph + '" value="' + esc(cur) + '">';
+            html += wheelHtml(spec.f, spec.soft ? 'soft' : '', 'data-item="' + esc(item.id) + '" data-set="' + n + '"', cur);
           });
           html += '</div>';
         }
@@ -595,13 +633,14 @@ function renderLog() {
     saveDraft();
   };
   el.querySelectorAll('.fld').forEach(inp => {
-    inp.oninput = () => {
+    inp.onchange = () => {
       const dd = draftFor(routine.id);
       const id = inp.dataset.item;
       const idx = parseInt(inp.dataset.set, 10) - 1;
       if (!dd.values[id]) dd.values[id] = [];
       while (dd.values[id].length <= idx) dd.values[id].push({});
       dd.values[id][idx][inp.dataset.field] = inp.value;
+      inp.classList.toggle('empty', inp.value === '');
       saveDraft();
     };
   });
@@ -882,7 +921,7 @@ function openCustomSheet(slot) {
     + '<input id="cName" placeholder="e.g. Cable pullover" autocomplete="off"></div>'
     + '<div class="field"><label for="cType">Tracked as</label><select id="cType">' + typeOptions('weight') + '</select></div>'
     + '<div class="field" id="cSetsWrap"><label for="cSets">Sets</label>'
-    + '<input id="cSets" type="text" inputmode="numeric" value="3"></div>'
+    + '<select id="cSets">' + setsOptions(3) + '</select></div>'
     + '<div class="field"><label for="cTarget">Target (optional)</label>'
     + '<input id="cTarget" placeholder="e.g. 40kg · 3 x 8" autocomplete="off"></div>'
     + '<button class="savebtn" id="cAdd">Add to ' + esc(slotLabel) + '</button>'
@@ -916,7 +955,7 @@ function openEditSheet(itemId) {
     + '<div class="field"><label for="eType">Tracked as</label><select id="eType">' + typeOptions(item.type) + '</select></div>'
     + '<div class="field"><label for="eSlot">Section</label><select id="eSlot">' + slotOpts + '</select></div>'
     + '<div class="field" id="eSetsWrap"><label for="eSets">Sets</label>'
-    + '<input id="eSets" type="text" inputmode="numeric" value="' + esc(item.sets) + '"></div>'
+    + '<select id="eSets">' + setsOptions(item.sets) + '</select></div>'
     + '<div class="field"><label for="eTarget">Target (optional)</label>'
     + '<input id="eTarget" value="' + esc(item.target) + '" autocomplete="off"></div>'
     + '<button class="savebtn" id="eSave">Save changes</button>'
