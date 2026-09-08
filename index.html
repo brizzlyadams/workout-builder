@@ -108,57 +108,34 @@
     font-size: 11px; color: #7A8296; font-weight: 700;
     margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.4px;
   }
-  .setcol input, .setcol select, .setcol button.fld {
+  .setcol input, .setcol .wheelbox {
     width: 100%;
     border: 1.5px solid var(--brand-light);
     border-radius: 8px; padding: 8px 4px; text-align: center; text-align-last: center;
     font-size: 15px; font-family: inherit; margin-bottom: 5px;
   }
   .setcol input::placeholder { color: #B7C0D1; }
-  .setcol input.soft, .setcol button.fld.soft { border-color: var(--grey-border); }
+  .setcol input.soft, .setcol .wheelbox.soft { border-color: var(--grey-border); }
 
-  /* Entry wheel (drum picker) */
-  .setcol button.fld { display: block; background: #fff; color: #111; cursor: pointer; }
-  .setcol button.fld.empty { color: #B7C0D1; }
-  .pick { position: fixed; inset: 0; z-index: 70; display: flex; flex-direction: column; justify-content: flex-end; }
-  .pick[hidden] { display: none; }
-  .pickbg { position: absolute; inset: 0; background: rgba(0,0,0,0.35); }
-  .picksheet {
-    position: relative; background: #fff; border-radius: 16px 16px 0 0;
-    padding-bottom: env(safe-area-inset-bottom); max-width: 480px; width: 100%; margin: 0 auto;
+  /* Entry wheel (inline drum) */
+  .setcol .wheelbox {
+    height: 78px; padding: 0; position: relative; overflow: hidden; background: #fff;
+    touch-action: none; user-select: none; -webkit-user-select: none; cursor: ns-resize;
   }
-  .pickhead {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 6px 8px; border-bottom: 1.5px solid var(--grey-border);
+  .wheelbox .wheel {
+    position: absolute; inset: 0;
+    -webkit-mask-image: linear-gradient(transparent, #000 34%, #000 66%, transparent);
+    mask-image: linear-gradient(transparent, #000 34%, #000 66%, transparent);
   }
-  .pickhead button {
-    background: none; border: 0; font-family: inherit; font-size: 17px;
-    color: var(--brand-light); padding: 8px 10px; cursor: pointer;
+  .wheelbox .it {
+    position: absolute; left: 0; right: 0; top: 26px; height: 26px; line-height: 26px;
+    text-align: center; font-size: 15px; color: #111; font-variant-numeric: tabular-nums;
+    will-change: transform;
   }
-  .pickhead .pickdone { font-weight: 700; }
-  .picktitle {
-    font-size: 12px; font-weight: 700; color: #7A8296;
-    text-transform: uppercase; letter-spacing: 0.4px;
-  }
-  .pickcols {
-    position: relative; display: flex; justify-content: center; gap: 4px;
-    height: 220px; overflow: hidden;
-    -webkit-mask-image: linear-gradient(transparent, #000 25%, #000 75%, transparent);
-    mask-image: linear-gradient(transparent, #000 25%, #000 75%, transparent);
-  }
-  .pickcol {
-    width: 120px; height: 100%; overflow-y: auto; scroll-snap-type: y mandatory;
-    scrollbar-width: none; -webkit-overflow-scrolling: touch; position: relative; z-index: 1;
-  }
-  .pickcol::-webkit-scrollbar { display: none; }
-  .pickcol .pad { height: 88px; }
-  .pickcol .it {
-    height: 44px; line-height: 44px; text-align: center; font-size: 22px;
-    scroll-snap-align: center; color: #111; font-variant-numeric: tabular-nums;
-  }
-  .pickline {
-    position: absolute; left: 50%; transform: translateX(-50%); width: 252px; top: 88px; height: 44px;
-    border-radius: 10px; background: rgba(0,0,0,0.05); pointer-events: none;
+  .wheelbox .it.ph { color: #B7C0D1; }
+  .wheelbox .band {
+    position: absolute; left: 4px; right: 4px; top: 26px; height: 26px;
+    border-radius: 6px; background: rgba(122,69,168,0.08); pointer-events: none;
   }
 
   .savebar { padding: 10px 16px 4px; }
@@ -423,110 +400,130 @@ function esc(s) {
 }
 
 // ---- Entry wheels -----------------------------------------------------------
-// Each per-set field is a button that opens a drum picker (a bottom sheet with
-// CSS scroll-snap columns, since iOS 16+ shows a <select> as a popup list, not
-// a wheel). kg has two columns, whole kg and .00/.25/.50/.75; everything else
-// has one. The first row of the first column is blank, so a set can be cleared.
-// Values are stored as the same strings the old text fields produced; an off-
-// grid stored value (an old typed "42.3") shows unchanged on the page and is
-// only replaced when Done is tapped on the wheel.
+// Each per-set field is an inline drum: a three-row box you flick in place,
+// like the inline date picker in iOS Calendar. iOS 16+ shows a <select> as a
+// popup list, so the wheel is hand-built. The box renders only the five rows
+// around the current value and drives them with pointer events and its own
+// momentum, so a 800-row kg wheel costs seven DOM nodes, and the box owns the
+// touch outright (touch-action: none), so the page never scrolls behind it.
+// Row 0 is blank (it shows the placeholder), so a set can be cleared.
+// Values are stored as the same strings the old text fields produced; an
+// off-grid stored value (an old typed "42.3") snaps to the nearest row when
+// the wheel is first drawn and is stored only once the wheel is moved.
 const WHEELS = {
-  w:    { ph: 'kg',   cols: [{ min: 0, max: 200, step: 1,   dec: 0 }, { min: 0, max: 0.75, step: 0.25, dec: 2, frac: true }] },
-  r:    { ph: 'reps', cols: [{ min: 0, max: 50,  step: 1,   dec: 0 }] },
-  t:    { ph: 'sec',  cols: [{ min: 0, max: 300, step: 1,   dec: 0 }] },
-  min:  { ph: 'min',  cols: [{ min: 0, max: 120, step: 1,   dec: 0 }] },
-  dist: { ph: 'km',   cols: [{ min: 0, max: 30,  step: 0.1, dec: 1 }] },
-  lvl:  { ph: 'lvl',  cols: [{ min: 0, max: 30,  step: 0.5, dec: 1 }] },
+  w:    { ph: 'kg',   min: 0, max: 200, step: 0.25, dec: 2 },
+  r:    { ph: 'reps', min: 0, max: 50,  step: 1,    dec: 0 },
+  t:    { ph: 'sec',  min: 0, max: 300, step: 1,    dec: 0 },
+  min:  { ph: 'min',  min: 0, max: 120, step: 1,    dec: 0 },
+  dist: { ph: 'km',   min: 0, max: 30,  step: 0.1,  dec: 1 },
+  lvl:  { ph: 'lvl',  min: 0, max: 30,  step: 0.5,  dec: 1 },
 };
-const WHEEL_ROW = 44, WHEEL_ROWS = 5;
+const WHEEL_ROW = 26;           // px per row; the box shows three
 function wheelFmt(v, dec) { return String(Number(v.toFixed(dec))); }
-function wheelHtml(field, cls, attrs, value) {
-  const spec = WHEELS[field];
-  const cur = String(value == null ? '' : value).trim();
-  return '<button type="button" class="fld' + (cls ? ' ' + cls : '') + (cur === '' ? ' empty' : '')
-       + '" data-field="' + field + '" data-value="' + esc(cur) + '" ' + attrs + '>'
-       + (cur === '' ? spec.ph : esc(cur)) + '</button>';
-}
-// Row labels/values for one column. Column 0 gets the blank row first.
-function wheelRows(col, first) {
-  const rows = first ? [{ v: null, label: '—' }] : [];
-  const n = Math.round((col.max - col.min) / col.step);
-  for (let i = 0; i <= n; i++) {
-    const v = Number((col.min + i * col.step).toFixed(col.dec));
-    rows.push({ v: v, label: col.frac ? '.' + String(Math.round(v * 100)).padStart(2, '0') : wheelFmt(v, col.dec) });
-  }
-  return rows;
-}
-// Which row of each column shows the current value (nearest grid point).
-function wheelIndices(spec, cur) {
+function wheelCount(spec) { return Math.round((spec.max - spec.min) / spec.step) + 2; }  // + blank row
+function wheelLabel(spec, i) { return i <= 0 ? spec.ph : wheelFmt(spec.min + (i - 1) * spec.step, spec.dec); }
+function wheelValue(spec, i) { return i <= 0 ? '' : wheelFmt(spec.min + (i - 1) * spec.step, spec.dec); }
+function wheelIndex(spec, cur) {
   const num = cur !== '' && isFinite(cur) ? Number(cur) : null;
-  if (num === null) return spec.cols.map(() => 0);
-  if (spec.cols.length === 2) {
-    let whole = Math.floor(num), frac = Math.round((num - whole) / spec.cols[1].step);
-    if (frac > 3) { whole += 1; frac = 0; }
-    whole = Math.min(Math.max(whole, spec.cols[0].min), spec.cols[0].max);
-    return [whole - spec.cols[0].min + 1, frac];
+  if (num === null) return 0;
+  const i = Math.round((num - spec.min) / spec.step) + 1;
+  return Math.min(Math.max(i, 1), wheelCount(spec) - 1);
+}
+function wheelHtml(field, cls, attrs, value) {
+  const cur = String(value == null ? '' : value).trim();
+  return '<div class="fld wheelbox' + (cls ? ' ' + cls : '') + (cur === '' ? ' empty' : '')
+       + '" data-field="' + field + '" data-value="' + esc(cur) + '" ' + attrs + '>'
+       + '<div class="band"></div><div class="wheel">'
+       + '<div class="it"></div><div class="it"></div><div class="it"></div><div class="it"></div><div class="it"></div>'
+       + '</div></div>';
+}
+function wheelInit(box) {
+  const spec = WHEELS[box.dataset.field];
+  const rows = Array.from(box.querySelectorAll('.it'));
+  const max = wheelCount(spec) - 1;
+  let idx = wheelIndex(spec, box.dataset.value || '');   // fractional while moving
+  let raf = 0, vel = 0, lastT = 0, target = null;
+  let drag = null;   // { y0, idx0, samples[] }
+
+  function draw() {
+    const c = Math.round(idx), off = idx - c;
+    rows.forEach((r, k) => {
+      const i = c + k - 2;
+      r.textContent = (i < 0 || i > max) ? '' : wheelLabel(spec, i);
+      r.style.transform = 'translateY(' + ((k - 2 - off) * WHEEL_ROW) + 'px)';
+      r.classList.toggle('mid', k === 2);
+      r.classList.toggle('ph', i === 0);
+    });
   }
-  const c = spec.cols[0];
-  const i = Math.round((num - c.min) / c.step);
-  return [Math.min(Math.max(i, 0), Math.round((c.max - c.min) / c.step)) + 1];
-}
-let wheelEl = null, wheelTarget = null;
-function wheelMount() {
-  if (wheelEl) return wheelEl;
-  wheelEl = document.createElement('div');
-  wheelEl.className = 'pick';
-  wheelEl.hidden = true;
-  wheelEl.innerHTML = '<div class="pickbg"></div><div class="picksheet">'
-    + '<div class="pickhead"><button type="button" class="pickcancel">Cancel</button>'
-    + '<span class="picktitle"></span><button type="button" class="pickdone">Done</button></div>'
-    + '<div class="pickcols"><div class="pickline"></div></div></div>';
-  document.body.appendChild(wheelEl);
-  wheelEl.querySelector('.pickbg').onclick = wheelClose;
-  wheelEl.querySelector('.pickcancel').onclick = wheelClose;
-  wheelEl.querySelector('.pickdone').onclick = wheelDone;
-  return wheelEl;
-}
-function wheelOpen(btn) {
-  const el = wheelMount();
-  const spec = WHEELS[btn.dataset.field];
-  wheelTarget = btn;
-  el.querySelector('.picktitle').textContent = spec.ph;
-  const cols = el.querySelector('.pickcols');
-  cols.querySelectorAll('.pickcol').forEach(c => c.remove());
-  const idx = wheelIndices(spec, btn.dataset.value || '');
-  const pad = '<div class="pad"></div>';
-  spec.cols.forEach((col, ci) => {
-    const c = document.createElement('div');
-    c.className = 'pickcol';
-    c.innerHTML = pad + wheelRows(col, ci === 0).map(r => '<div class="it">' + r.label + '</div>').join('') + pad;
-    cols.insertBefore(c, cols.querySelector('.pickline'));
-  });
-  el.hidden = false;
-  cols.querySelectorAll('.pickcol').forEach((c, ci) => { c.scrollTop = idx[ci] * WHEEL_ROW; });
-}
-function wheelClose() { if (wheelEl) wheelEl.hidden = true; wheelTarget = null; }
-function wheelDone() {
-  const btn = wheelTarget;
-  if (!btn) return wheelClose();
-  const spec = WHEELS[btn.dataset.field];
-  const cols = Array.from(wheelEl.querySelectorAll('.pickcol'));
-  const picks = cols.map((c, ci) => {
-    const rows = wheelRows(spec.cols[ci], ci === 0);
-    const i = Math.min(Math.max(Math.round(c.scrollTop / WHEEL_ROW), 0), rows.length - 1);
-    return rows[i].v;
-  });
-  let val = '';
-  if (picks[0] !== null) {
-    let v = picks[0];
-    if (picks.length === 2) v = v + picks[1];
-    val = wheelFmt(v, spec.cols[spec.cols.length - 1].dec);
+  function commit() {
+    idx = Math.min(Math.max(Math.round(idx), 0), max);
+    draw();
+    const val = wheelValue(spec, idx);
+    if (val === box.dataset.value) return;
+    box.dataset.value = val;
+    box.classList.toggle('empty', val === '');
+    box.dispatchEvent(new Event('change'));
   }
-  btn.dataset.value = val;
-  btn.textContent = val === '' ? spec.ph : val;
-  btn.classList.toggle('empty', val === '');
-  wheelClose();
-  btn.dispatchEvent(new Event('change'));
+  function step(t) {
+    const dt = lastT ? Math.min(t - lastT, 50) : 16;
+    lastT = t;
+    if (target === null) {
+      idx += vel * dt;
+      vel *= Math.pow(0.9975, dt);           // ~400 ms time constant
+      if (idx < 0) { idx = 0; vel = 0; }
+      if (idx > max) { idx = max; vel = 0; }
+      if (Math.abs(vel) < 0.002) target = Math.round(idx);
+    } else {
+      idx += (target - idx) * 0.3;
+      if (Math.abs(target - idx) < 0.01) { raf = 0; lastT = 0; commit(); return; }
+    }
+    draw();
+    raf = requestAnimationFrame(step);
+  }
+  function settle(v) {
+    cancelAnimationFrame(raf);
+    vel = Math.min(Math.max(v, -0.2), 0.2);   // rows per ms, capped (~80 rows per flick)
+    target = null; lastT = 0;
+    raf = requestAnimationFrame(step);
+  }
+
+  box.addEventListener('pointerdown', e => {
+    if (e.button) return;
+    cancelAnimationFrame(raf); raf = 0; lastT = 0;
+    drag = { y0: e.clientY, idx0: idx, t0: performance.now(), samples: [[performance.now(), idx]] };
+    box.setPointerCapture(e.pointerId);
+  });
+  box.addEventListener('pointermove', e => {
+    if (!drag) return;
+    idx = drag.idx0 + (drag.y0 - e.clientY) / WHEEL_ROW;   // drag up -> higher rows
+    if (idx < -0.5) idx = -0.5;
+    if (idx > max + 0.5) idx = max + 0.5;
+    const now = performance.now();
+    drag.samples.push([now, idx]);
+    if (drag.samples.length > 12) drag.samples.shift();
+    draw();
+  });
+  function release(e) {
+    if (!drag) return;
+    const d = drag; drag = null;
+    const now = performance.now();
+    const moved = Math.abs(idx - d.idx0) * WHEEL_ROW;
+    if (moved < 4 && now - d.t0 < 300) {
+      // A tap: top third steps down, bottom third steps up.
+      const y = e.clientY - box.getBoundingClientRect().top, h = box.clientHeight;
+      idx = d.idx0 + (y < h / 3 ? -1 : y > 2 * h / 3 ? 1 : 0);
+      return settle(0);
+    }
+    // Velocity from the last 100 ms only, so a drag that stops before the
+    // finger lifts does not fling.
+    const recent = d.samples.filter(s => now - s[0] <= 100);
+    const s0 = recent[0], s1 = recent[recent.length - 1];
+    const v = (recent.length < 2 || s1[0] === s0[0]) ? 0 : (s1[1] - s0[1]) / (s1[0] - s0[0]);
+    settle(Math.abs(v) < 0.012 ? 0 : v);   // a slow drag snaps; a flick (> ~300 px/s) throws
+  }
+  box.addEventListener('pointerup', release);
+  box.addEventListener('pointercancel', release);
+  draw();
 }
 // ---- end Entry wheels -------------------------------------------------------
 // Sets count for the add / edit sheets: 1-6, the cap the sheets already enforce.
@@ -751,7 +748,7 @@ function renderLog() {
     saveDraft();
   };
   el.querySelectorAll('.fld').forEach(inp => {
-    inp.onclick = () => wheelOpen(inp);
+    wheelInit(inp);
     inp.onchange = () => {
       const dd = draftFor(routine.id);
       const id = inp.dataset.item;
